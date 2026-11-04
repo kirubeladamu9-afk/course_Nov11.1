@@ -27,6 +27,7 @@ const InfoPage = loadSection(() => import('@/components/info/info-page'))
 const BookstorePage = lazy(() => import('@/components/bookstore/bookstore-page').then((module) => ({ default: module.BookstorePage })))
 
 const HomeHero = loadSection(() => import('@/components/home/hero'))
+const HomeDotNetPillars = loadSection(() => import('@/components/home/dotnet-pillars'))
 const HomeFeature = loadSection(() => import('@/components/home/feature'))
 const HomePopularCourse = loadSection<{ courses: Course[] }>(() => import('@/components/home/popular-courses'))
 const HomeTrainingPrograms = loadSection<{ courses: Course[] }>(() => import('@/components/home/training-programs'))
@@ -207,6 +208,7 @@ const App: React.FC<AppProps> = ({ darkMode, onToggleDarkMode }) => {
         ) : (
           <>
             <HomeHero />
+            <HomeDotNetPillars />
             <HomePopularCourse courses={homeCourses ?? []} />
             <HomeTrainingPrograms courses={homeCourses ?? []} />
             <HomeFeature />
