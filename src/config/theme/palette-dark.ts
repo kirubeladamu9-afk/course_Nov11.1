@@ -3,7 +3,7 @@ import type { PaletteOptions } from '@mui/material/styles'
 const paletteDark: PaletteOptions = {
   mode: 'dark',
   background: {
-    default: '#101716',
+    default: '#171717',
     paper: '#192321',
   },
   text: {

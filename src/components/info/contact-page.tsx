@@ -48,7 +48,7 @@ const ContactPage: FC = () => {
     link.click()
   }
 
-  return <Box component="main" sx={{ backgroundColor: (theme) => theme.palette.mode === 'dark' ? theme.palette.background.default : '#f8fbfb', color: 'text.primary' }}>
+  return <Box component="main" sx={{ backgroundColor: 'background.default', color: 'text.primary' }}>
     <Box sx={{ position: 'relative', overflow: 'hidden', color: 'common.white', background: (theme) => theme.palette.mode === 'dark' ? 'linear-gradient(120deg, #102b3f 0%, #0b514b 100%)' : 'linear-gradient(120deg, #102b3f 0%, #12685d 68%, #168276 100%)' }}>
       <Box aria-hidden="true" sx={{ position: 'absolute', width: 440, height: 440, borderRadius: '50%', right: { xs: -240, md: -90 }, top: -225, border: '1px solid rgba(255,255,255,.12)', boxShadow: '0 0 0 48px rgba(255,255,255,.035), 0 0 0 96px rgba(255,255,255,.025)' }} />
       <Container maxWidth="lg" sx={{ position: 'relative', py: { xs: 6, md: 9 } }}>

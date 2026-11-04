@@ -25,9 +25,7 @@ const createTheme = (darkMode = false): Theme => {
             '--app-selected': theme.palette.action.selected,
             '--app-overlay': alpha(theme.palette.common.black, theme.palette.mode === 'dark' ? 0.56 : 0.12),
             '--app-drawer-shadow': `-12px 0 28px ${alpha(theme.palette.common.black, theme.palette.mode === 'dark' ? 0.34 : 0.12)}`,
-            '--app-content-gradient': theme.palette.mode === 'dark'
-              ? `linear-gradient(135deg, ${theme.palette.background.default} 0%, ${alpha(theme.palette.primary.dark, 0.34)} 100%)`
-              : `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.88)} 0%, ${alpha(theme.palette.primary.light, 0.20)} 100%)`,
+            '--app-content-gradient': theme.palette.background.default,
             '--app-auth-backdrop': `radial-gradient(circle at 20% 0%, ${alpha(theme.palette.primary.main, theme.palette.mode === 'dark' ? 0.24 : 0.12)}, transparent 34%)`,
             '--app-auth-panel': theme.palette.mode === 'dark'
               ? 'linear-gradient(145deg, #101716 0%, #172725 58%, #155d56 100%)'

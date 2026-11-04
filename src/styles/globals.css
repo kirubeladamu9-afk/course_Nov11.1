@@ -1,5 +1,5 @@
 :root {
-  --app-canvas: #f2f5f5;
+  --app-canvas: #FAFAFA;
   --app-surface: #ffffff;
   --app-text: #212121;
   --app-text-muted: #717171;
@@ -8,7 +8,7 @@
   --app-selected: #e1f1ec;
   --app-overlay: rgba(0, 0, 0, 0.12);
   --app-drawer-shadow: -12px 0 28px rgba(0, 0, 0, 0.12);
-  --app-content-gradient: linear-gradient(135deg, #f9fcfc 0%, #f2f8f7 100%);
+  --app-content-gradient: #FAFAFA;
   --app-auth-backdrop: radial-gradient(circle at 20% 0%, rgba(16, 125, 111, 0.12), transparent 34%);
   --app-auth-panel: linear-gradient(145deg, #1f1717 0%, #302323 58%, #163f3c 100%);
   --color-scrollbar: #c8d2cf;
@@ -16,7 +16,7 @@
 }
 
 :root[data-theme='dark'] {
-  --app-canvas: #101716;
+  --app-canvas: #171717;
   --app-surface: #192321;
   --app-text: #f2f7f6;
   --app-text-muted: #b3c0bd;
@@ -25,7 +25,7 @@
   --app-selected: #2b413b;
   --app-overlay: rgba(0, 0, 0, 0.56);
   --app-drawer-shadow: -12px 0 28px rgba(0, 0, 0, 0.34);
-  --app-content-gradient: linear-gradient(135deg, #101716 0%, #142420 100%);
+  --app-content-gradient: #171717;
   --app-auth-backdrop: radial-gradient(circle at 20% 0%, rgba(18, 124, 113, 0.24), transparent 34%);
   --app-auth-panel: linear-gradient(145deg, #101716 0%, #172725 58%, #155d56 100%);
   --color-scrollbar: #41524e;
