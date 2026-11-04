@@ -560,7 +560,7 @@ export const CourseEditor: FC<{ course: AdminCourse; onChange: (course: AdminCou
           <Stack spacing={2}>
         <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
           <TextField required fullWidth label="Course title" value={course.title} onChange={(event) => onChange({ ...course, title: event.target.value })} />
-          <FormControl fullWidth required><InputLabel>Program</InputLabel><Select label="Program" value={course.category} onChange={(event) => onChange({ ...course, category: event.target.value })}><MenuItem value="Data">Data</MenuItem><MenuItem value="Development">Development</MenuItem><MenuItem value="Design">Design</MenuItem><MenuItem value="Business">Business</MenuItem><MenuItem value="Labs only">Labs only</MenuItem></Select></FormControl>
+          <TextField required fullWidth label="Program / category" placeholder="Enter a category, such as Data or Design" value={course.category} onChange={(event) => onChange({ ...course, category: event.target.value })} helperText="Use an existing category or enter a new one." />
         </Stack>
         <Stack spacing={1} sx={{ width: '100%' }}>
           <Typography variant="body2" sx={{ fontWeight: 600 }}>Thumbnail</Typography>
@@ -1087,7 +1087,7 @@ const OverviewPage: FC<{ displayName: string }> = ({ displayName }) => {
 const createEmptyCourse = (): AdminCourse => ({
   id: 0,
   title: 'Untitled course',
-  category: 'Development',
+  category: '',
   level: 'Beginner',
   tutor: 'Maya Chen',
   status: 'Draft',
@@ -1218,6 +1218,10 @@ const CourseEditorPage: FC<CourseEditorPageProps> = ({ mode, courseId }) => {
       toast.add({ title: 'Course title is required', description: 'Add a title before saving the course.', type: 'error', priority: 'high' })
       return
     }
+    if (!course.category.trim()) {
+      toast.add({ title: 'Course category is required', description: 'Enter a category before saving the course.', type: 'error', priority: 'high' })
+      return
+    }
     if (!course.cover.trim()) {
       toast.add({ title: 'Course thumbnail is required', description: 'Add a thumbnail URL before saving the course.', type: 'error', priority: 'high' })
       return
@@ -1225,7 +1229,8 @@ const CourseEditorPage: FC<CourseEditorPageProps> = ({ mode, courseId }) => {
 
     setIsSaving(true)
     try {
-      const savedCourse = mode === 'new' ? await createAdminCourse({ ...course, title }) : await updateAdminCourse({ ...course, title })
+      const courseData = { ...course, title, category: course.category.trim() }
+      const savedCourse = mode === 'new' ? await createAdminCourse(courseData) : await updateAdminCourse(courseData)
       setCourse(savedCourse)
       toast.add({ title: mode === 'new' ? 'Course created' : 'Course saved', description: `${savedCourse.title} is now stored in the database.`, type: 'success' })
       if (mode === 'new') navigateTo(`/admin/courses/${savedCourse.id}/edit`, true)
