@@ -595,7 +595,7 @@ export const CourseEditor: FC<{ course: AdminCourse; onChange: (course: AdminCou
         {course.modules.length === 0 && !isAddingModule && <Box sx={{ p: 4, textAlign: 'center', border: 1, borderColor: 'divider', borderStyle: 'dashed', borderRadius: 1 }}><Typography color="text.secondary" sx={{ mb: 1 }}>This course has no modules yet.</Typography><Button label="Add your first module" size="small" onClick={() => setIsAddingModule(true)} /></Box>}
         {course.modules.map((module) => {
           const isExpanded = expandedModuleIds.includes(module.id)
-          return <Paper key={module.id} elevation={0} draggable onDragStart={() => setDraggedModule(module.id)} onDragOver={(event) => event.preventDefault()} onDrop={() => moveModule(module.id)} sx={{ p: 1.5, backgroundColor: 'background.default', border: 1, borderColor: 'divider' }}>
+          return <Paper key={module.id} elevation={0} draggable={addingLessonModuleId !== module.id} onDragStart={() => setDraggedModule(module.id)} onDragOver={(event) => event.preventDefault()} onDrop={() => moveModule(module.id)} sx={{ p: 1.5, backgroundColor: 'background.default', border: 1, borderColor: 'divider' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <IconButton size="small" onClick={() => setExpandedModuleIds((ids) => isExpanded ? ids.filter((id) => id !== module.id) : [...ids, module.id])} aria-label={`${isExpanded ? 'Collapse' : 'Expand'} ${module.title}`} aria-expanded={isExpanded}><ChevronRightIcon sx={{ transform: isExpanded ? 'rotate(90deg)' : 'none', transition: 'transform 160ms ease' }} fontSize="small" /></IconButton>
               <DragIndicatorIcon color="disabled" fontSize="small" />
