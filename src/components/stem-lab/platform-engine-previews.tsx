@@ -163,8 +163,6 @@ const SimulationEngine: FC<EnginePreviewProps> = ({ onComplete }) => {
   return <EngineFrame name="Simulation Engine" description="Change an input, run the model, and inspect the calculated output."><Typography variant="body2">Temperature: {temperature}°C</Typography><Slider min={0} max={100} value={temperature} onChange={(_, next) => { setTemperature(Array.isArray(next) ? next[0] : next); setRan(false) }} aria-label="Temperature" /><Button variant="contained" onClick={() => setRan(true)} startIcon={<PlayArrowIcon />} sx={{ alignSelf: 'flex-start' }}>Run simulation</Button>{ran && <Paper role="status" elevation={0} sx={{ p: 2, backgroundColor: 'background.default' }}><Typography variant="h4" color="primary.main">{output}</Typography><Typography variant="caption" color="text.secondary">Model output units</Typography></Paper>}<CompleteButton disabled={!ran} onComplete={onComplete} /></EngineFrame>
 }
 
-const PhysicsEngine: FC<EnginePreviewProps> = ({ onComplete }) => <ForcePlaygroundActivity onComplete={onComplete} />
-
 const VirtualLabEngine: FC<EnginePreviewProps> = ({ onComplete }) => {
   const [mixed, setMixed] = useState(false)
   return <EngineFrame name="Virtual Lab Engine" description="Combine safe virtual materials, run the procedure, and observe the configured result."><Stack direction="row" spacing={1} justifyContent="center"><Chip label="Acid sample" color="warning" /><Typography sx={{ alignSelf: 'center' }}>+</Typography><Chip label="Base sample" color="info" /></Stack><Button variant="contained" onClick={() => setMixed(true)} startIcon={<PlayArrowIcon />} sx={{ alignSelf: 'flex-start' }}>Mix and observe</Button>{mixed && <Paper role="status" elevation={0} sx={{ p: 2, border: 1, borderColor: 'success.main', backgroundColor: 'success.light' }}><Typography sx={{ fontWeight: 700 }}>Neutralization observed</Typography><Typography variant="body2">The combined sample moves toward neutral pH.</Typography></Paper>}<CompleteButton disabled={!mixed} onComplete={onComplete} /></EngineFrame>
@@ -823,35 +821,37 @@ const MathActivityEngine: FC<{ topic: MathTopic; onComplete?: () => void }> = ({
 }
 
 export const PlatformEnginePreview: FC<{ engineId: PlatformEngineId; onComplete?: () => void; mathTopic?: MathTopic; topicTitle?: string }> = ({ engineId, onComplete, mathTopic, topicTitle }) => {
+  const normalizedTopicTitle = topicTitle?.trim().replace(/[’‘]/g, "'")
   if (mathTopic) return <MathActivityEngine topic={mathTopic} onComplete={onComplete} />
-  if (engineId === 'formula-builder' || topicTitle === 'Chemical Formulae') return <FormulaBuilderActivity onComplete={onComplete} />
-  if (engineId === 'photosynthesis-lab' || topicTitle === 'Photosynthesis') return <PhotosynthesisLabActivity onComplete={onComplete} />
-  if (engineId === 'cell-zoom' || topicTitle === 'Cells') return <CellZoomActivity onComplete={onComplete} />
-  if (engineId === 'material-sorter' || topicTitle === 'Materials Around Us') return <MaterialSorterActivity onComplete={onComplete} />
-  if (engineId === 'state-sorter' || topicTitle === 'Solids/Liquids/Gases') return <StateSorterActivity onComplete={onComplete} />
-  if (engineId === 'particle-state-simulator' || topicTitle === 'States of Matter' || topicTitle === 'Heat & Cold') return <ParticleStateSimulator onComplete={onComplete} subjectLabel={topicTitle === 'Heat & Cold' ? 'Physics' : 'Chemistry'} />
-  if (engineId === 'solution-builder' || topicTitle === 'Solutions' || topicTitle === 'Dissolving') return <SolutionBuilderActivity onComplete={onComplete} />
-  if (engineId === 'acid-base-lab' || topicTitle === 'Acids & Bases') return <AcidBaseLabActivity onComplete={onComplete} />
-  if (engineId === 'water-properties-lab' || topicTitle === 'Water Chemistry') return <WaterPropertiesLabActivity onComplete={onComplete} />
-  if (engineId === 'atom-builder' || topicTitle === 'Atomic Structure') return <AtomBuilderActivity onComplete={onComplete} />
-  if (engineId === 'element-compound-sorter' || topicTitle === 'Elements & Compounds') return <ElementCompoundSorterActivity onComplete={onComplete} />
-  if (engineId === 'reaction-simulator' || topicTitle === 'Chemical Reactions') return <ReactionSimulatorActivity onComplete={onComplete} />
-  if (engineId === 'periodic-table' || topicTitle === 'Periodic Table') return <PeriodicTableActivity onComplete={onComplete} />
-  if (engineId === 'chemical-bonding' || topicTitle === 'Chemical Bonding') return <ChemicalBondingActivity onComplete={onComplete} />
-  if (engineId === 'materials-properties' || topicTitle === 'Properties of Materials' || topicTitle === 'Mixing Materials') return <MaterialsPropertiesActivity onComplete={onComplete} />
-  if (topicTitle === 'Electromagnetic Induction') return <FaradaySimulation onComplete={onComplete} />
-  if (topicTitle === 'Pendulum Experiment') return <PendulumSimulation onComplete={onComplete} />
-  if (topicTitle === 'Forces & Motion') return <ForceMotionLabActivity onComplete={onComplete} />
-  if (topicTitle === 'Friction') return <SurfaceTestActivity onComplete={onComplete} />
-  if (topicTitle === 'Gravity') return <DropZoneActivity onComplete={onComplete} />
-  if (topicTitle === 'Reflection') return <LightRaySimulatorActivity onComplete={onComplete} />
-  if (topicTitle === 'Refraction') return <LightThroughMaterialsActivity onComplete={onComplete} />
-  if (topicTitle === 'Vectors & Scalars') return <VectorPlaygroundPhysicsActivity onComplete={onComplete} />
-  if (topicTitle?.replace(/[’‘]/g, "'") === "Newton's Laws") return <CollisionPlaygroundActivity onComplete={onComplete} />
-  if (topicTitle === 'Momentum') return <MomentumLabActivity onComplete={onComplete} />
-  if (topicTitle === 'Simple Machines') return <MachinePlaygroundActivity onComplete={onComplete} />
-  if (topicTitle === 'Energy') return <EnergyRollerCoasterActivity onComplete={onComplete} />
-  if (topicTitle === 'Electricity') return <CircuitBuilderActivity onComplete={onComplete} />
+  if (engineId === 'formula-builder' || normalizedTopicTitle === 'Chemical Formulae') return <FormulaBuilderActivity onComplete={onComplete} />
+  if (engineId === 'photosynthesis-lab' || normalizedTopicTitle === 'Photosynthesis') return <PhotosynthesisLabActivity onComplete={onComplete} />
+  if (engineId === 'cell-zoom' || normalizedTopicTitle === 'Cells') return <CellZoomActivity onComplete={onComplete} />
+  if (engineId === 'material-sorter' || normalizedTopicTitle === 'Materials Around Us') return <MaterialSorterActivity onComplete={onComplete} />
+  if (engineId === 'state-sorter' || normalizedTopicTitle === 'Solids/Liquids/Gases') return <StateSorterActivity onComplete={onComplete} />
+  if (normalizedTopicTitle === 'Heat & Cold') return <ParticleHeatActivity onComplete={onComplete} />
+  if (engineId === 'particle-state-simulator' || normalizedTopicTitle === 'States of Matter') return <ParticleStateSimulator onComplete={onComplete} />
+  if (engineId === 'solution-builder' || normalizedTopicTitle === 'Solutions' || normalizedTopicTitle === 'Dissolving') return <SolutionBuilderActivity onComplete={onComplete} />
+  if (engineId === 'acid-base-lab' || normalizedTopicTitle === 'Acids & Bases') return <AcidBaseLabActivity onComplete={onComplete} />
+  if (engineId === 'water-properties-lab' || normalizedTopicTitle === 'Water Chemistry') return <WaterPropertiesLabActivity onComplete={onComplete} />
+  if (engineId === 'atom-builder' || normalizedTopicTitle === 'Atomic Structure') return <AtomBuilderActivity onComplete={onComplete} />
+  if (engineId === 'element-compound-sorter' || normalizedTopicTitle === 'Elements & Compounds') return <ElementCompoundSorterActivity onComplete={onComplete} />
+  if (engineId === 'reaction-simulator' || normalizedTopicTitle === 'Chemical Reactions') return <ReactionSimulatorActivity onComplete={onComplete} />
+  if (engineId === 'periodic-table' || normalizedTopicTitle === 'Periodic Table') return <PeriodicTableActivity onComplete={onComplete} />
+  if (engineId === 'chemical-bonding' || normalizedTopicTitle === 'Chemical Bonding') return <ChemicalBondingActivity onComplete={onComplete} />
+  if (engineId === 'materials-properties' || normalizedTopicTitle === 'Properties of Materials' || normalizedTopicTitle === 'Mixing Materials') return <MaterialsPropertiesActivity onComplete={onComplete} />
+  if (normalizedTopicTitle === 'Electromagnetic Induction') return <FaradaySimulation onComplete={onComplete} />
+  if (normalizedTopicTitle === 'Pendulum Experiment') return <PendulumSimulation onComplete={onComplete} />
+  if (normalizedTopicTitle === 'Forces & Motion') return <ForceMotionLabActivity onComplete={onComplete} />
+  if (normalizedTopicTitle === 'Friction') return <SurfaceTestActivity onComplete={onComplete} />
+  if (normalizedTopicTitle === 'Gravity') return <DropZoneActivity onComplete={onComplete} />
+  if (normalizedTopicTitle === 'Reflection') return <LightRaySimulatorActivity onComplete={onComplete} />
+  if (normalizedTopicTitle === 'Refraction') return <LightThroughMaterialsActivity onComplete={onComplete} />
+  if (normalizedTopicTitle === 'Vectors & Scalars') return <VectorPlaygroundPhysicsActivity onComplete={onComplete} />
+  if (normalizedTopicTitle === "Newton's Laws") return <CollisionPlaygroundActivity onComplete={onComplete} />
+  if (normalizedTopicTitle === 'Momentum') return <MomentumLabActivity onComplete={onComplete} />
+  if (normalizedTopicTitle === 'Simple Machines') return <MachinePlaygroundActivity onComplete={onComplete} />
+  if (normalizedTopicTitle === 'Energy') return <EnergyRollerCoasterActivity onComplete={onComplete} />
+  if (normalizedTopicTitle === 'Electricity') return <CircuitBuilderActivity onComplete={onComplete} />
   if (engineId === 'drag-drop') return <DragDropEngine config={{ title: 'Sort living and non-living things', prompt: 'Place each example into the correct category.', categories: ['Living', 'Non-living'], items: [{ id: 'tree', label: 'Tree', correctCategory: 'Living' }, { id: 'rock', label: 'Rock', correctCategory: 'Non-living' }, { id: 'dog', label: 'Dog', correctCategory: 'Living' }, { id: 'water', label: 'Water', correctCategory: 'Non-living' }] }} onComplete={onComplete ?? (() => undefined)} />
   if (engineId === 'living-or-not') return <LivingOrNotActivity onComplete={onComplete} />
   if (engineId === 'plant-labeling') return <PlantLabelingActivity onComplete={onComplete} />
@@ -873,27 +873,27 @@ export const PlatformEnginePreview: FC<{ engineId: PlatformEngineId; onComplete?
   if (engineId === 'machine-playground') return <MachinePlaygroundActivity onComplete={onComplete} />
   if (engineId === 'energy-roller-coaster') return <EnergyRollerCoasterActivity onComplete={onComplete} />
   if (engineId === 'circuit-builder') return <CircuitBuilderActivity onComplete={onComplete} />
-  if (engineId === 'force-playground' || (engineId === 'physics' && topicTitle === 'Push & Pull')) return <ForcePlaygroundActivity onComplete={onComplete} />
-  if (engineId === 'force-motion-lab' || (engineId === 'physics' && topicTitle === 'Forces & Motion')) return <ForceMotionLabActivity onComplete={onComplete} />
-  if (engineId === 'surface-test' || (engineId === 'physics' && topicTitle === 'Friction')) return <SurfaceTestActivity onComplete={onComplete} />
-  if (engineId === 'drop-zone' || (engineId === 'physics' && topicTitle === 'Gravity')) return <DropZoneActivity onComplete={onComplete} />
-  if (engineId === 'light-ray' || (engineId === 'physics' && topicTitle === 'Reflection')) return <LightRaySimulatorActivity onComplete={onComplete} />
-  if (engineId === 'light-through-materials' || (engineId === 'physics' && topicTitle === 'Refraction')) return <LightThroughMaterialsActivity onComplete={onComplete} />
-  if (engineId === 'vector-playground-physics' || (engineId === 'physics' && topicTitle === 'Vectors & Scalars')) return <VectorPlaygroundPhysicsActivity onComplete={onComplete} />
-  if (engineId === 'collision-playground' || (engineId === 'physics' && topicTitle === "Newton's Laws")) return <CollisionPlaygroundActivity onComplete={onComplete} />
-  if (engineId === 'momentum-lab' || (engineId === 'physics' && topicTitle === 'Momentum')) return <MomentumLabActivity onComplete={onComplete} />
-  if (engineId === 'motion-track' || (engineId === 'physics' && topicTitle === 'Movement')) return <MotionTrackActivity onComplete={onComplete} />
-  if (engineId === 'speed-race' || (engineId === 'physics' && topicTitle === 'Fast & Slow')) return <SpeedRaceActivity onComplete={onComplete} />
-  if (engineId === 'speed-calculator-lab' || (engineId === 'physics' && topicTitle === 'Speed & Velocity')) return <SpeedCalculatorLabActivity onComplete={onComplete} />
-  if (engineId === 'shadow-lab' || (engineId === 'physics' && topicTitle === 'Light & Shadows')) return <ShadowLabActivity onComplete={onComplete} />
-  if (engineId === 'wave-simulator' || (engineId === 'physics' && ['Sound & Vibrations', 'Waves'].includes(topicTitle ?? ''))) return <WaveSimulatorActivity onComplete={onComplete} />
-  if (engineId === 'kinematics' || (engineId === 'physics' && topicTitle === 'Kinematics')) return <KinematicsActivity onComplete={onComplete} />
-  if (engineId === 'projectile-motion' || (engineId === 'physics' && topicTitle === 'Projectile Motion')) return <ProjectileMotionActivity onComplete={onComplete} />
-  if (engineId === 'semiconductor' || (engineId === 'physics' && topicTitle === 'Semiconductor Electronics')) return <SemiconductorActivity onComplete={onComplete} />
-  if (engineId === 'particle-heat' || (engineId === 'physics' && topicTitle === 'Heat & Cold')) return <ParticleHeatActivity onComplete={onComplete} />
-  if (engineId === 'magnetic-playground' || (engineId === 'physics' && topicTitle === 'Magnets')) return <MagneticPlaygroundActivity onComplete={onComplete} />
-  if (engineId === 'floating-sinking' || (engineId === 'physics' && topicTitle === 'Floating & Sinking')) return <FloatingSinkingActivity onComplete={onComplete} />
-  if (engineId === 'physics') return <PhysicsEngine onComplete={onComplete} />
+  if (normalizedTopicTitle === 'Push & Pull' || (!normalizedTopicTitle && engineId === 'force-playground')) return <ForcePlaygroundActivity onComplete={onComplete} />
+  if (engineId === 'force-motion-lab' || (engineId === 'physics' && normalizedTopicTitle === 'Forces & Motion')) return <ForceMotionLabActivity onComplete={onComplete} />
+  if (engineId === 'surface-test' || (engineId === 'physics' && normalizedTopicTitle === 'Friction')) return <SurfaceTestActivity onComplete={onComplete} />
+  if (engineId === 'drop-zone' || (engineId === 'physics' && normalizedTopicTitle === 'Gravity')) return <DropZoneActivity onComplete={onComplete} />
+  if (engineId === 'light-ray' || (engineId === 'physics' && normalizedTopicTitle === 'Reflection')) return <LightRaySimulatorActivity onComplete={onComplete} />
+  if (engineId === 'light-through-materials' || (engineId === 'physics' && normalizedTopicTitle === 'Refraction')) return <LightThroughMaterialsActivity onComplete={onComplete} />
+  if (engineId === 'vector-playground-physics' || (engineId === 'physics' && normalizedTopicTitle === 'Vectors & Scalars')) return <VectorPlaygroundPhysicsActivity onComplete={onComplete} />
+  if (engineId === 'collision-playground' || (engineId === 'physics' && normalizedTopicTitle === "Newton's Laws")) return <CollisionPlaygroundActivity onComplete={onComplete} />
+  if (engineId === 'momentum-lab' || (engineId === 'physics' && normalizedTopicTitle === 'Momentum')) return <MomentumLabActivity onComplete={onComplete} />
+  if (engineId === 'motion-track' || (engineId === 'physics' && normalizedTopicTitle === 'Movement')) return <MotionTrackActivity onComplete={onComplete} />
+  if (engineId === 'speed-race' || (engineId === 'physics' && normalizedTopicTitle === 'Fast & Slow')) return <SpeedRaceActivity onComplete={onComplete} />
+  if (engineId === 'speed-calculator-lab' || (engineId === 'physics' && normalizedTopicTitle === 'Speed & Velocity')) return <SpeedCalculatorLabActivity onComplete={onComplete} />
+  if (engineId === 'shadow-lab' || (engineId === 'physics' && normalizedTopicTitle === 'Light & Shadows')) return <ShadowLabActivity onComplete={onComplete} />
+  if (engineId === 'wave-simulator' || (engineId === 'physics' && ['Sound & Vibrations', 'Waves'].includes(normalizedTopicTitle ?? ''))) return <WaveSimulatorActivity onComplete={onComplete} />
+  if (engineId === 'kinematics' || (engineId === 'physics' && normalizedTopicTitle === 'Kinematics')) return <KinematicsActivity onComplete={onComplete} />
+  if (engineId === 'projectile-motion' || (engineId === 'physics' && normalizedTopicTitle === 'Projectile Motion')) return <ProjectileMotionActivity onComplete={onComplete} />
+  if (engineId === 'semiconductor' || (engineId === 'physics' && normalizedTopicTitle === 'Semiconductor Electronics')) return <SemiconductorActivity onComplete={onComplete} />
+  if (engineId === 'particle-heat' || (engineId === 'physics' && normalizedTopicTitle === 'Heat & Cold')) return <ParticleHeatActivity onComplete={onComplete} />
+  if (engineId === 'magnetic-playground' || (engineId === 'physics' && normalizedTopicTitle === 'Magnets')) return <MagneticPlaygroundActivity onComplete={onComplete} />
+  if (engineId === 'floating-sinking' || (engineId === 'physics' && normalizedTopicTitle === 'Floating & Sinking')) return <FloatingSinkingActivity onComplete={onComplete} />
+  if (engineId === 'physics') return <SimulationEngine onComplete={onComplete} />
   if (engineId === 'virtual-lab') return <VirtualLabEngine onComplete={onComplete} />
   return <PredictionExperimentEngine onComplete={onComplete} />
 }

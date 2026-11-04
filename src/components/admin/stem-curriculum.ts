@@ -73,8 +73,9 @@ export const STEM_CURRICULUM: Record<string, string[]> = {
 }
 
 export const getMathTopic = (title: string) => MATHEMATICS_TOPICS.find((topic) => topic.title === title)
+const normalizeTopicTitle = (title: string) => title.trim().toLowerCase().replace(/[’‘]/g, "'")
 export const getCurriculumTopicKey = (subject: string, title: string) => {
-  const index = STEM_CURRICULUM[subject]?.indexOf(title) ?? -1
+  const index = STEM_CURRICULUM[subject]?.findIndex((topic) => normalizeTopicTitle(topic) === normalizeTopicTitle(title)) ?? -1
   return index < 0 ? undefined : `${subject.toLowerCase()}-${index + 1}-${title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
 }
 
@@ -84,7 +85,7 @@ export const getMathTopicForLesson = (moduleTitle: string, curriculumTopic: stri
 }
 
 export const engineForTopic = (subject: string, topic: string): PlatformEngineId => {
-  const value = topic.toLowerCase().replace(/[’‘]/g, "'")
+  const value = topic.trim().toLowerCase().replace(/[’‘]/g, "'")
   if (subject === 'Mathematics') {
     if (/number|addition|subtraction|fraction|integer|counting/.test(value)) return 'number-line'
     if (/geometry|angle|perimeter|area|symmetry|pythagorean|similarity|vector/.test(value)) return 'geometry'
@@ -101,7 +102,15 @@ export const engineForTopic = (subject: string, topic: string): PlatformEngineId
     if (value === 'light & shadows') return 'shadow-lab'
     if (value === 'sound & vibrations' || value === 'waves') return 'wave-simulator'
     if (value === 'kinematics') return 'kinematics'
-    if (value === 'heat & cold') return 'particle-state-simulator'
+    if (value === 'heat & cold') return 'particle-heat'
+    if (value === 'linear motion') return 'kinematics'
+    if (value === 'gravitation') return 'drop-zone'
+    if (value === 'force') return 'force-motion-lab'
+    if (value === 'measuring motion' || value === 'motion') return 'motion-track'
+    if (value === 'oscillations') return 'wave-simulator'
+    if (value === 'thermal physics') return 'particle-state-simulator'
+    if (value === 'current electricity') return 'circuit-builder'
+    if (value === 'magnetism') return 'magnetic-playground'
     if (value === 'magnets') return 'magnetic-playground'
     if (value === 'floating & sinking') return 'floating-sinking'
     if (value === 'forces & motion') return 'force-motion-lab'
@@ -116,7 +125,7 @@ export const engineForTopic = (subject: string, topic: string): PlatformEngineId
     if (value === 'energy') return 'energy-roller-coaster'
     if (value === 'electricity') return 'circuit-builder'
     if (value === 'semiconductor electronics') return 'semiconductor'
-    return 'physics'
+    return 'simulation'
   }
   if (subject === 'Chemistry') {
     if (value === 'chemical bonding') return 'chemical-bonding'
@@ -132,7 +141,6 @@ export const engineForTopic = (subject: string, topic: string): PlatformEngineId
     if (value === 'chemical reactions') return 'reaction-simulator'
     if (value === 'periodic table') return 'periodic-table'
     if (value === 'properties of materials') return 'materials-properties'
-    if (/atom|molecule|periodic|bond|organic|hydrocarbon|alcohol|aldehyde|polymer/.test(value)) return 'molecule-atom'
     if (/equation|formula|stoichiometry|redox|oxidation/.test(value)) return 'equation-balance'
     return 'simulation'
   }
@@ -144,9 +152,9 @@ export const engineForTopic = (subject: string, topic: string): PlatformEngineId
   if (subject === 'Biology' && value === 'five senses') return 'sense-challenge'
   if (subject === 'Biology' && value === 'animals around us') return 'animal-spotter'
   if (subject === 'Biology' && value === 'food & nutrition') return 'healthy-plate'
+  if (subject === 'Biology' && ['cell division', 'plant reproduction', 'human reproduction'].includes(value)) return 'simulation'
   if (/microscope|cell/.test(value)) return 'microscope'
-  if (/life cycle|reproduction|timeline|division/.test(value)) return 'timeline'
-  if (/plant|body|animal|habitat|ecosystem|food|dna|molecular|structure/.test(value)) return 'biology-explorer'
+  if (/life cycles?|timeline/.test(value)) return 'timeline'
   return 'simulation'
 }
 
