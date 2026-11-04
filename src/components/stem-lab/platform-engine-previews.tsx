@@ -847,7 +847,7 @@ export const PlatformEnginePreview: FC<{ engineId: PlatformEngineId; onComplete?
   if (topicTitle === 'Reflection') return <LightRaySimulatorActivity onComplete={onComplete} />
   if (topicTitle === 'Refraction') return <LightThroughMaterialsActivity onComplete={onComplete} />
   if (topicTitle === 'Vectors & Scalars') return <VectorPlaygroundPhysicsActivity onComplete={onComplete} />
-  if (topicTitle === "Newton's Laws") return <CollisionPlaygroundActivity onComplete={onComplete} />
+  if (topicTitle?.replace(/[’‘]/g, "'") === "Newton's Laws") return <CollisionPlaygroundActivity onComplete={onComplete} />
   if (topicTitle === 'Momentum') return <MomentumLabActivity onComplete={onComplete} />
   if (topicTitle === 'Simple Machines') return <MachinePlaygroundActivity onComplete={onComplete} />
   if (topicTitle === 'Energy') return <EnergyRollerCoasterActivity onComplete={onComplete} />

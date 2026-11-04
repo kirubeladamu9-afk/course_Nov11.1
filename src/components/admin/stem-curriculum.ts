@@ -84,7 +84,7 @@ export const getMathTopicForLesson = (moduleTitle: string, curriculumTopic: stri
 }
 
 export const engineForTopic = (subject: string, topic: string): PlatformEngineId => {
-  const value = topic.toLowerCase()
+  const value = topic.toLowerCase().replace(/[’‘]/g, "'")
   if (subject === 'Mathematics') {
     if (/number|addition|subtraction|fraction|integer|counting/.test(value)) return 'number-line'
     if (/geometry|angle|perimeter|area|symmetry|pythagorean|similarity|vector/.test(value)) return 'geometry'
