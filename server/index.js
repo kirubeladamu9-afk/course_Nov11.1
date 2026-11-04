@@ -1482,9 +1482,11 @@ const parseCoursePayload = (body) => {
   const learningOutcomes = Array.isArray(body.learningOutcomes) && body.learningOutcomes.every((value) => typeof value === 'string') ? body.learningOutcomes : null
   const requirements = Array.isArray(body.requirements) && body.requirements.every((value) => typeof value === 'string') ? body.requirements : null
   const modules = Array.isArray(body.modules) ? body.modules : null
-  const hasInvalidSolverLesson = modules && getCourseLessons(modules).some((lesson) => lesson?.type === 'stepByStepSolver' && !isValidStepByStepSolverConfig(lesson.stepByStepSolver))
+  const courseLessons = modules ? getCourseLessons(modules) : []
+  const hasInvalidSolverLesson = courseLessons.some((lesson) => lesson?.type === 'stepByStepSolver' && !isValidStepByStepSolverConfig(lesson.stepByStepSolver))
+  const hasLiveLesson = courseLessons.some((lesson) => lesson?.type === 'live')
 
-  if (!title || !category || !level || !isValidCourseCover(cover) || !status || !Number.isFinite(price) || price < 0 || !Number.isInteger(students) || students < 0 || !learningOutcomes || !requirements || !modules || hasInvalidSolverLesson || typeof body.description !== 'string' || typeof body.longDescription !== 'string' || typeof body.certificate !== 'boolean') {
+  if (!title || !category || !level || !isValidCourseCover(cover) || !status || !Number.isFinite(price) || price < 0 || !Number.isInteger(students) || students < 0 || !learningOutcomes || !requirements || !modules || hasInvalidSolverLesson || hasLiveLesson || typeof body.description !== 'string' || typeof body.longDescription !== 'string' || typeof body.certificate !== 'boolean') {
     return null
   }
 
