@@ -34,6 +34,8 @@ const HomePopularCourse: FC<{ courses: Course[] }> = ({ courses }) => {
 
   const sliderRef = useRef<Slider | null>(null)
 
+  if (courses.length === 0) return null
+
   const sliderConfig: Settings = {
     infinite: courses.length > (matchMobileView ? 1 : 3),
     autoplay: true,
