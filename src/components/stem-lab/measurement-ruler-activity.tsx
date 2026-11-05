@@ -275,8 +275,8 @@ const MeasurementRulerActivity: FC<{ topic: MathTopic; onComplete?: () => void }
         )}
 
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} flexWrap="wrap">
-          <Button variant="outlined" onClick={() => setChecked(true)}>Check activity</Button>
-          <Button variant="contained" disabled={!isCorrect} onClick={onComplete} startIcon={<CheckCircleOutlineIcon />}>Complete activity</Button>
+          <Button variant="outlined" onClick={() => setChecked(true)}>Check Activity</Button>
+          <Button variant="contained" disabled={!isCorrect} onClick={onComplete} startIcon={<CheckCircleOutlineIcon />}>Complete Activity</Button>
           <Button variant="outlined" onClick={() => loadRound(roundIndex)} startIcon={<ReplayIcon />}>Reset</Button>
           <Button variant="text" disabled={!isCorrect} onClick={() => loadRound(roundIndex + 1)}>Next round</Button>
         </Stack>

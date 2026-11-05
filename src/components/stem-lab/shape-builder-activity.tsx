@@ -4,43 +4,318 @@ import Chip from '@mui/material/Chip'
 import Paper from '@mui/material/Paper'
 import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
+import ToggleButton from '@mui/material/ToggleButton'
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import Typography from '@mui/material/Typography'
-import { type FC, useState } from 'react'
+import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined'
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline'
+import ReplayIcon from '@mui/icons-material/Replay'
+import { type FC, type PointerEvent, useState } from 'react'
 import { type MathTopic } from '@/components/admin/stem-curriculum'
+import {
+  COLS,
+  ROWS,
+  SHAPE_NAMES,
+  type Point,
+  type Round,
+  type ShapeName,
+  type Stage,
+  clamp,
+  cornerAngles,
+  createRound,
+  describeSpec,
+  evaluateShape,
+  formatLength,
+  parkedPoints,
+  rightCorners,
+  sideLengths,
+  sidesOf,
+} from './shape-geometry'
 
-type ShapeName = 'triangle' | 'square' | 'rectangle' | 'pentagon' | 'hexagon'
-type Point = { x: number; y: number }
-type ShapeRound = { mode: 'build the shape' | 'fix the shape' | 'name the shape' | 'count the properties'; target: ShapeName }
-const shapeNames: ShapeName[] = ['triangle', 'square', 'rectangle', 'pentagon', 'hexagon']
+const CELL = 25
+const WIDTH = COLS * CELL
+const HEIGHT = ROWS * CELL
+
 const shapeIcons: Record<ShapeName, string> = { triangle: '△', square: '□', rectangle: '▭', pentagon: '⬠', hexagon: '⬡' }
-const sideCount: Record<ShapeName, number> = { triangle: 3, square: 4, rectangle: 4, pentagon: 5, hexagon: 6 }
-const targetPoints: Record<ShapeName, Point[]> = { triangle: [{ x: 160, y: 70 }, { x: 80, y: 230 }, { x: 240, y: 230 }], square: [{ x: 90, y: 80 }, { x: 250, y: 80 }, { x: 250, y: 240 }, { x: 90, y: 240 }], rectangle: [{ x: 70, y: 100 }, { x: 270, y: 100 }, { x: 270, y: 220 }, { x: 70, y: 220 }], pentagon: [{ x: 170, y: 55 }, { x: 270, y: 130 }, { x: 230, y: 240 }, { x: 105, y: 240 }, { x: 70, y: 130 }], hexagon: [{ x: 100, y: 85 }, { x: 240, y: 85 }, { x: 285, y: 165 }, { x: 240, y: 245 }, { x: 100, y: 245 }, { x: 55, y: 165 }] }
-const scattered = (shape: ShapeName) => targetPoints[shape].map((point, index) => ({ x: point.x + (index % 2 ? 30 : -22), y: point.y + (index % 3 ? -18 : 25) }))
-const createRound = (number: number): ShapeRound => ({ mode: (['build the shape', 'fix the shape', 'name the shape', 'count the properties'] as ShapeRound['mode'][])[number % 4], target: shapeNames[Math.floor(Math.random() * shapeNames.length)] })
-const distance = (a: Point, b: Point) => Math.hypot(a.x - b.x, a.y - b.y)
+const STAGE_TITLES: Record<Stage, string> = { build: 'Build from scratch', fix: 'Fix the shape', name: 'Name this shape' }
+
+const centroid = (points: Point[]): Point => ({
+  x: points.reduce((sum, point) => sum + point.x, 0) / points.length,
+  y: points.reduce((sum, point) => sum + point.y, 0) / points.length,
+})
+
+const unit = (from: Point, to: Point): Point => {
+  const dx = to.x - from.x
+  const dy = to.y - from.y
+  const length = Math.hypot(dx, dy) || 1
+  return { x: dx / length, y: dy / length }
+}
 
 const ShapeBuilderActivity: FC<{ topic: MathTopic; onComplete?: () => void }> = ({ topic, onComplete }) => {
-  const [roundNumber, setRoundNumber] = useState(0)
-  const [round, setRound] = useState(() => createRound(0))
-  const [shape, setShape] = useState<ShapeName>(round.target)
-  const [points, setPoints] = useState<Point[]>(() => scattered(round.target))
+  const [roundIndex, setRoundIndex] = useState(0)
+  const [round, setRound] = useState<Round>(() => createRound(0))
+  const [pickedShape, setPickedShape] = useState<ShapeName>(round.spec.shape)
+  const [points, setPoints] = useState<Point[]>(round.points)
   const [dragging, setDragging] = useState<number | null>(null)
   const [answerName, setAnswerName] = useState<ShapeName | null>(null)
   const [answerSides, setAnswerSides] = useState('')
   const [checked, setChecked] = useState(false)
-  const [correct, setCorrect] = useState(false)
-  const [completed, setCompleted] = useState(false)
-  const chooseShape = (value: ShapeName) => { setShape(value); setPoints(scattered(value)); setAnswerName(null); setAnswerSides(''); setChecked(false); setCorrect(false) }
-  const reset = () => { setPoints(scattered(shape)); setAnswerName(null); setAnswerSides(''); setChecked(false); setCorrect(false); setCompleted(false) }
-  const nextRound = () => { const next = roundNumber + 1; const nextData = createRound(next); setRoundNumber(next); setRound(nextData); setShape(nextData.target); setPoints(scattered(nextData.target)); setAnswerName(null); setAnswerSides(''); setChecked(false); setCorrect(false); setCompleted(false) }
-  const movePoint = (event: React.PointerEvent<SVGSVGElement>) => { if (dragging === null) return; const bounds = event.currentTarget.getBoundingClientRect(); const x = Math.max(25, Math.min(335, Math.round(((event.clientX - bounds.left) / bounds.width * 400) / 20) * 20)); const y = Math.max(25, Math.min(275, Math.round(((event.clientY - bounds.top) / bounds.height * 300) / 20) * 20)); setPoints((current) => current.map((point, index) => index === dragging ? { x, y } : point)) }
-  const polygonPoints = points.map((point) => `${point.x},${point.y}`).join(' ')
-  const lengths = points.map((point, index) => distance(point, points[(index + 1) % points.length]))
-  const equalSides = Math.max(...lengths) - Math.min(...lengths) < 25
-  const shapeCorrect = points.length === sideCount[shape] && (shape === 'square' ? equalSides : true)
-  const answerCorrect = round.mode === 'name the shape' ? answerName === round.target && Number(answerSides) === sideCount[round.target] : round.mode === 'count the properties' ? Number(answerSides) === sideCount[round.target] : shape === round.target && shapeCorrect
-  const instruction = round.mode === 'build the shape' ? `Drag the dots to build a ${round.target}.` : round.mode === 'fix the shape' ? `Fix the vertices until this shape becomes a ${round.target}.` : round.mode === 'name the shape' ? 'Choose the shape name and its number of sides.' : `Count the sides and vertices in this ${round.target}.`
-  return <Paper elevation={0} sx={{ p: { xs: 2.5, md: 3 }, border: 1, borderColor: 'divider' }}><Stack spacing={2}><Box><Chip label="Platform engine" color="primary" variant="outlined" sx={{ mb: 1 }} /><Typography variant="h5">{topic.activity}</Typography><Typography color="text.secondary" sx={{ mt: .75 }}>{topic.activityDescription}</Typography></Box><Chip label="Foundation" color="primary" sx={{ alignSelf: 'flex-start' }} /><Typography variant="h6">Round {roundNumber + 1}: {round.mode}</Typography><Typography variant="body2" color="text.secondary">{instruction}</Typography><Stack direction="row" spacing={1} flexWrap="wrap">{shapeNames.map((name) => <Button key={name} variant={shape === name ? 'contained' : 'outlined'} onClick={() => chooseShape(name)}>{shapeIcons[name]} {name}</Button>)}</Stack><Stack direction={{ xs: 'column', md: 'row' }} spacing={2}><Paper elevation={0} sx={{ flex: 1, border: 1, borderColor: correct ? 'success.main' : 'divider', overflow: 'hidden', animation: checked && !correct ? 'shapeShake .35s ease' : 'none', '@keyframes shapeShake': { '0%, 100%': { transform: 'translateX(0)' }, '25%': { transform: 'translateX(-5px)' }, '75%': { transform: 'translateX(5px)' } } }}><Box component="svg" viewBox="0 0 400 300" sx={{ display: 'block', width: '100%', background: 'repeating-linear-gradient(0deg, #fff 0 19px, #dbe8e4 20px), repeating-linear-gradient(90deg, transparent 0 19px, #dbe8e4 20px)' }} onPointerMove={movePoint} onPointerUp={() => setDragging(null)} onPointerLeave={() => setDragging(null)} role="img" aria-label={`${shape} construction grid`}><polygon points={polygonPoints} fill={correct ? 'rgba(16,125,111,.27)' : 'rgba(79,140,255,.18)'} stroke={correct ? 'var(--mui-palette-success-main)' : 'var(--mui-palette-primary-main)'} strokeWidth="4" strokeLinejoin="round" />{points.map((point, index) => <circle key={index} cx={point.x} cy={point.y} r="12" fill="var(--mui-palette-secondary-main)" stroke="#fff" strokeWidth="3" onPointerDown={(event) => { event.stopPropagation(); setDragging(index) }} style={{ cursor: 'grab' }} />)}</Box></Paper><Paper elevation={0} sx={{ width: { md: 180 }, p: 2, backgroundColor: 'background.default', border: 1, borderColor: 'divider', textAlign: 'center' }}><Typography sx={{ fontSize: 42 }}>🧑‍🔧</Typography><Typography sx={{ fontWeight: 800 }}>Builder</Typography><Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>{correct ? 'Great build! Nice work.' : 'Drag each dot onto the grid.'}</Typography></Paper></Stack><Stack direction="row" spacing={1} flexWrap="wrap"><Chip label={`${sideCount[shape]} sides`} /><Chip label={`${points.length} vertices`} />{lengths.slice(0, 3).map((length, index) => <Chip key={index} label={`Side ${index + 1}: ${Math.round(length / 20)} units`} />)}</Stack>{(round.mode === 'name the shape' || round.mode === 'count the properties') && <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>{round.mode === 'name the shape' && <Stack direction="row" spacing={1} flexWrap="wrap">{shapeNames.map((name) => <Button key={name} variant={answerName === name ? 'contained' : 'outlined'} onClick={() => { setAnswerName(name); setChecked(false); setCorrect(false) }}>{shapeIcons[name]} {name}</Button>)}</Stack>}<TextField size="small" type="number" label="Number of sides" value={answerSides} onChange={(event) => { setAnswerSides(event.target.value); setChecked(false); setCorrect(false) }} /></Stack>}<Stack direction="row" spacing={1}><Button variant="outlined" onClick={reset}>Reset</Button><Button variant="contained" onClick={() => { setChecked(true); setCorrect(answerCorrect) }}>Check Activity</Button></Stack>{checked && <Paper role="status" elevation={0} sx={{ p: 1.5, border: 1, borderColor: correct ? 'success.main' : 'error.main', backgroundColor: correct ? 'success.light' : 'background.default' }}><Typography sx={{ fontWeight: 700, color: correct ? 'success.main' : 'error.main' }}>{correct ? `Great job! You built a ${shape} with ${sideCount[shape]} equal sides.` : shape === 'square' ? 'Two sides are not the same length yet.' : 'Keep adjusting the dots until the properties match.'}</Typography></Paper>}{correct && !completed && <Button variant="contained" onClick={() => { setCompleted(true); onComplete?.() }}>Complete Activity</Button>}{completed && <Stack direction="row" spacing={1} alignItems="center"><Typography color="success.main" sx={{ fontWeight: 700 }}>Builder cheers — activity complete!</Typography><Button variant="outlined" onClick={nextRound}>Next round</Button></Stack>}</Stack></Paper>
+
+  const isName = round.stage === 'name'
+  const checks = isName ? [] : evaluateShape(points, round.spec)
+  const nameProblems: string[] = []
+  if (answerName === null) nameProblems.push('Choose the name of the shape.')
+  else if (answerName !== round.spec.shape) nameProblems.push(`This shape is not a ${answerName}.`)
+  if (answerSides.trim() === '') nameProblems.push('Type how many sides the shape has.')
+  else if (Number(answerSides) !== sidesOf(round.spec.shape)) nameProblems.push(`You entered ${answerSides} sides. Count the corners again.`)
+  const problems = isName ? nameProblems : checks.filter((check) => check.status === 'fail').map((check) => check.problem)
+  const passing = problems.length === 0
+
+  const angles = cornerAngles(points)
+  const right = rightCorners(points)
+  const lengths = sideLengths(points)
+  const center = centroid(points)
+  const polygon = points.map((point) => `${point.x * CELL},${point.y * CELL}`).join(' ')
+  const instruction = isName
+    ? 'Look at the finished shape, then pick its name and type how many sides it has.'
+    : round.stage === 'build'
+      ? `Build ${describeSpec(round.spec)}. Drag each dot onto a grid point.`
+      : `Move the dots so the shape is ${describeSpec(round.spec)}.`
+
+  const loadRound = (index: number) => {
+    const next = createRound(index)
+    setRoundIndex(index)
+    setRound(next)
+    setPickedShape(next.spec.shape)
+    setPoints(next.points)
+    setDragging(null)
+    setAnswerName(null)
+    setAnswerSides('')
+    setChecked(false)
+  }
+
+  const pickShape = (shape: ShapeName) => {
+    if (shape === pickedShape) return
+    setPickedShape(shape)
+    setPoints(parkedPoints(sidesOf(shape)))
+    setChecked(false)
+  }
+
+  const toGrid = (event: PointerEvent<SVGSVGElement>): Point => {
+    const box = event.currentTarget.getBoundingClientRect()
+    return {
+      x: clamp(Math.round(((event.clientX - box.left) / box.width) * COLS), 0, COLS),
+      y: clamp(Math.round(((event.clientY - box.top) / box.height) * ROWS), 0, ROWS),
+    }
+  }
+
+  const startDrag = (event: PointerEvent<SVGCircleElement>, index: number) => {
+    event.stopPropagation()
+    event.currentTarget.setPointerCapture(event.pointerId)
+    setDragging(index)
+  }
+
+  const moveDot = (event: PointerEvent<SVGSVGElement>) => {
+    if (dragging === null) return
+    const next = toGrid(event)
+    setPoints((current) => {
+      const existing = current[dragging]
+      if (existing.x === next.x && existing.y === next.y) return current
+      return current.map((point, index) => (index === dragging ? next : point))
+    })
+    setChecked(false)
+  }
+
+  const stopDrag = () => setDragging(null)
+
+  return (
+    <Paper elevation={0} sx={{ p: { xs: 2.5, md: 3 }, border: 1, borderColor: 'divider' }}>
+      <Stack spacing={2}>
+        <Box>
+          <Chip label="Platform engine" color="primary" variant="outlined" sx={{ mb: 1 }} />
+          <Typography variant="h5">{topic.activity}</Typography>
+          <Typography color="text.secondary" sx={{ mt: .75 }}>{topic.activityDescription}</Typography>
+        </Box>
+        <Chip label="Foundation" color="primary" sx={{ alignSelf: 'flex-start' }} />
+        <Typography variant="h6">Round {roundIndex + 1}: {STAGE_TITLES[round.stage]}</Typography>
+        <Typography variant="body2" color="text.secondary">{instruction}</Typography>
+
+        {!isName && (
+          <Stack direction="row" spacing={1} flexWrap="wrap">
+            {SHAPE_NAMES.map((name) => (
+              <Button key={name} variant={pickedShape === name ? 'contained' : 'outlined'} onClick={() => pickShape(name)}>
+                {shapeIcons[name]} {name}
+              </Button>
+            ))}
+          </Stack>
+        )}
+
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems="flex-start">
+          <Paper elevation={0} sx={{ flex: 1, minWidth: 0, width: '100%', border: 1, borderColor: passing ? 'success.main' : 'divider', overflow: 'hidden' }}>
+            <svg
+              viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+              role="img"
+              aria-label={isName ? 'Finished shape' : `Shape canvas with ${points.length} dots on a grid`}
+              style={{ display: 'block', width: '100%', height: 'auto', touchAction: 'none', backgroundColor: '#fff' }}
+              onPointerMove={moveDot}
+              onPointerUp={stopDrag}
+              onPointerCancel={stopDrag}
+            >
+              {Array.from({ length: COLS + 1 }, (_, index) => (
+                <line key={`v${index}`} x1={index * CELL} y1={0} x2={index * CELL} y2={HEIGHT} stroke="#d5e3df" strokeWidth={1} />
+              ))}
+              {Array.from({ length: ROWS + 1 }, (_, index) => (
+                <line key={`h${index}`} x1={0} y1={index * CELL} x2={WIDTH} y2={index * CELL} stroke="#d5e3df" strokeWidth={1} />
+              ))}
+              <polygon points={polygon} fill="var(--mui-palette-primary-main)" fillOpacity={0.18} stroke="var(--mui-palette-primary-main)" strokeWidth={3} strokeLinejoin="round" />
+
+              {!isName && points.map((point, index) => {
+                const next = points[(index + 1) % points.length]
+                const mid = { x: (point.x + next.x) / 2, y: (point.y + next.y) / 2 }
+                const outward = unit(center, mid)
+                const labelX = mid.x * CELL + outward.x * 22
+                const labelY = mid.y * CELL + outward.y * 22
+                return (
+                  <g key={`side-${index}`}>
+                    <rect x={labelX - 18} y={labelY - 11} width={36} height={22} rx={11} fill="#fff" stroke="#1d6b5f" />
+                    <text x={labelX} y={labelY + 5} textAnchor="middle" fontSize={13} fontWeight={700} fill="#1d6b5f">
+                      {formatLength(lengths[index])}
+                    </text>
+                  </g>
+                )
+              })}
+
+              {!isName && points.map((corner, index) => {
+                const previous = points[(index - 1 + points.length) % points.length]
+                const next = points[(index + 1) % points.length]
+                const cx = corner.x * CELL
+                const cy = corner.y * CELL
+                const inward = unit(corner, center)
+                const towardPrevious = unit(corner, previous)
+                const towardNext = unit(corner, next)
+                const markStart = { x: cx + towardPrevious.x * 14, y: cy + towardPrevious.y * 14 }
+                const markInner = { x: markStart.x + towardNext.x * 14, y: markStart.y + towardNext.y * 14 }
+                const markEnd = { x: cx + towardNext.x * 14, y: cy + towardNext.y * 14 }
+                return (
+                  <g key={`corner-${index}`}>
+                    {right[index] && (
+                      <path d={`M ${markStart.x} ${markStart.y} L ${markInner.x} ${markInner.y} L ${markEnd.x} ${markEnd.y}`} fill="none" stroke="#2e7d32" strokeWidth={2} />
+                    )}
+                    <text
+                      x={cx + inward.x * 32}
+                      y={cy + inward.y * 32 + 4}
+                      textAnchor="middle"
+                      fontSize={12}
+                      fontWeight={right[index] ? 800 : 500}
+                      fill={right[index] ? '#2e7d32' : '#37474f'}
+                    >
+                      {Math.round(angles[index])}°
+                    </text>
+                  </g>
+                )
+              })}
+
+              {points.map((point, index) => (
+                <circle
+                  key={index}
+                  cx={point.x * CELL}
+                  cy={point.y * CELL}
+                  r={isName ? 5 : 9}
+                  fill={isName ? '#1d6b5f' : 'var(--mui-palette-secondary-main)'}
+                  stroke="#fff"
+                  strokeWidth={3}
+                  style={{ cursor: isName ? 'default' : 'grab' }}
+                  onPointerDown={isName ? undefined : (event) => startDrag(event, index)}
+                />
+              ))}
+            </svg>
+          </Paper>
+
+          <Stack spacing={1.5} sx={{ flex: 1, minWidth: 0, width: '100%' }}>
+            {isName ? (
+              <Paper elevation={0} sx={{ p: 2, border: 1, borderColor: 'divider' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>Name and count</Typography>
+                <Stack spacing={2} sx={{ mt: 1.5 }}>
+                  <ToggleButtonGroup
+                    exclusive
+                    size="small"
+                    aria-label="Shape name"
+                    value={answerName}
+                    onChange={(_, next: ShapeName | null) => {
+                      setAnswerName(next)
+                      setChecked(false)
+                    }}
+                  >
+                    {SHAPE_NAMES.map((name) => (
+                      <ToggleButton key={name} value={name} sx={{ textTransform: 'capitalize' }}>{name}</ToggleButton>
+                    ))}
+                  </ToggleButtonGroup>
+                  <TextField
+                    type="number"
+                    size="small"
+                    label="Number of sides"
+                    value={answerSides}
+                    onChange={(event) => {
+                      setAnswerSides(event.target.value)
+                      setChecked(false)
+                    }}
+                    sx={{ maxWidth: 220 }}
+                  />
+                </Stack>
+              </Paper>
+            ) : (
+              <Paper elevation={0} sx={{ p: 2, border: 1, borderColor: 'divider' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>Properties</Typography>
+                <Stack spacing={.75} sx={{ mt: 1 }}>
+                  {checks.map((check) => (
+                    <Stack key={check.id} direction="row" spacing={1} alignItems="center">
+                      {check.status === 'pass' && <CheckCircleOutlineIcon fontSize="small" color="success" />}
+                      {check.status === 'fail' && <CancelOutlinedIcon fontSize="small" color="error" />}
+                      {check.status === 'not-required' && <RemoveCircleOutlineIcon fontSize="small" color="disabled" />}
+                      <Typography variant="body2" color={check.status === 'not-required' ? 'text.disabled' : 'text.primary'}>
+                        {check.label}
+                        {check.status === 'not-required' ? ' (not required for this shape)' : ''}
+                      </Typography>
+                    </Stack>
+                  ))}
+                </Stack>
+                <Typography variant="body2" sx={{ mt: 2, fontWeight: 700 }}>Corner angles</Typography>
+                <Stack direction="row" spacing={.75} flexWrap="wrap" sx={{ mt: .75 }}>
+                  {angles.map((angle, index) => (
+                    <Chip
+                      key={index}
+                      size="small"
+                      label={`Corner ${index + 1}: ${Math.round(angle)}°${right[index] ? ' (right angle)' : ''}`}
+                      color={right[index] ? 'success' : 'default'}
+                      variant={right[index] ? 'filled' : 'outlined'}
+                    />
+                  ))}
+                </Stack>
+              </Paper>
+            )}
+          </Stack>
+        </Stack>
+
+        {checked && (
+          passing ? (
+            <Typography role="status" color="success.main">Every check passes. Complete the activity or move to the next round.</Typography>
+          ) : (
+            <Stack role="status" spacing={.5}>
+              {problems.map((problem) => <Typography key={problem} color="warning.main">{problem}</Typography>)}
+            </Stack>
+          )
+        )}
+
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} flexWrap="wrap">
+          <Button variant="outlined" onClick={() => loadRound(roundIndex)} startIcon={<ReplayIcon />}>Reset</Button>
+          <Button variant="outlined" onClick={() => setChecked(true)}>Check Activity</Button>
+          <Button variant="contained" disabled={!passing} onClick={onComplete} startIcon={<CheckCircleOutlineIcon />}>Complete Activity</Button>
+          <Button variant="text" disabled={!passing} onClick={() => loadRound(roundIndex + 1)}>Next round</Button>
+        </Stack>
+      </Stack>
+    </Paper>
+  )
 }
 
 export default ShapeBuilderActivity
