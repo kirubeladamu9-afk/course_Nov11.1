@@ -15,7 +15,7 @@ export type MathTopic = {
 
 const foundation: MathTopic[] = [
   ['Counting & Number Recognition', 'Build quantity recognition and one-to-one counting with playful visuals.', 'Counting Garden', 'Tap animated bugs and fruits that wiggle and pop as they are counted.', 'count', 7],
-  ['Comparing Numbers', 'Compare quantities using greater than, less than, and equal to.', 'Number Balance', 'Choose the bigger number and watch a seesaw tip toward it.', 'input', 8],
+  ['Comparing Numbers', 'Compare quantities using greater than, less than, and equal to.', 'Number Balance', 'Compare quantities using greater than, less than, and equal to.', 'input', 8],
   ['Addition & Subtraction', 'Solve addition and subtraction by counting and moving along a number path.', 'Ten Frame Builder', 'Solve addition and subtraction by counting and moving along a number path.', 'slider', 6],
   ['Place Value', 'Break numbers into hundreds, tens, and ones using building blocks.', 'Base-10 Builder', 'Stack blocks and regroup them with a satisfying snap animation.', 'input', 342],
   ['Multiplication/Division Concepts', 'See multiplication as equal groups and division as fair sharing.', 'Array Builder', 'Drag critters into rows and columns that light up as groups are counted.', 'input', 3],
