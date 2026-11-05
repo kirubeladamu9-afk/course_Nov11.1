@@ -32,7 +32,7 @@ const foundation: MathTopic[] = [
 
 const core: MathTopic[] = [
   ['Symmetry', 'Complete shapes using mirror symmetry.', 'Mirror Drawing', 'Draw the missing half and let a magic mirror reveal whether it matches.', 'count', 5],
-  ['Coordinate Grids', 'Plot and move points on a coordinate grid.', 'Coordinate Robot', 'Guide a robot to target coordinates across a grid maze.', 'input', 4],
+  ['Coordinate Grids', 'Plot and move points on a coordinate grid.', 'Coordinate Robot', 'Plot and move points on a coordinate grid.', 'input', 4],
   ['Data & Statistics', 'Build charts and calculate mean, median, and mode.', 'Build-a-Chart', 'Drag bars upward and watch the chart animate as data is entered.', 'input', 6],
   ['Probability', 'Predict and test outcomes using a virtual random draw.', 'Probability Machine', 'Pull colored balls from a bag while a live graph tracks results.', 'count', 5],
   ['Patterns', 'Identify and extend visual and numeric patterns.', 'Pattern Train', 'Complete a train sequence as shape and number cars roll past.', 'input', 12],
