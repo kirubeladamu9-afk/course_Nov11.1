@@ -24,7 +24,7 @@ const foundation: MathTopic[] = [
   ['Ratios', 'Explore how ratios scale using everyday recipes.', 'Recipe Mixer', 'Adjust servings and watch ingredient icons multiply together.', 'slider', 4],
   ['Percentages', 'Connect percentages to fractions and real-world proportions.', '100 Grid Charger', 'Fill a battery-style grid as the percentage increases.', 'slider', 75],
   ['Factors & Multiples', 'Discover number relationships by finding factor pairs.', 'Factor Machine', 'Feed in a number and reveal its factor pairs.', 'input', 24],
-  ['Measurement', 'Practice measuring length using real-world objects.', 'Virtual Ruler Quest', 'Drag the ruler to measure objects in a playful scene.', 'slider', 9],
+  ['Measurement', 'Practice measuring length using real-world objects.', 'Virtual Ruler Quest', 'Practice measuring length using real-world objects.', 'slider', 9],
   ['Geometry', 'Construct and explore basic 2D shapes.', 'Shape Builder Workshop', 'Drag vertices into place while a builder character celebrates the shape.', 'count', 4],
   ['Angles', 'See how angles change from acute to straight.', 'Angle Rotator', "Spin a ray with a slider while a character's arm mimics the angle.", 'slider', 90],
   ['Perimeter & Area', 'Tile a space to understand area and perimeter.', 'Tile the Room', 'Place tiles inside a room and watch its perimeter outline light up.', 'input', 24],

@@ -8,7 +8,7 @@ import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
-import { type FC, type PointerEvent, type ReactNode, useState } from 'react'
+import { type FC, type ReactNode, useState } from 'react'
 import ForcePlaygroundActivity from './force-playground-activity'
 import MachinePlaygroundActivity from './machine-playground-activity'
 import EnergyRollerCoasterActivity from './energy-roller-coaster-activity'
@@ -62,6 +62,7 @@ import ImprovedApproachingPointActivity from './approaching-point-activity'
 import TangentLineActivity from './tangent-line-activity'
 import AreaUnderCurveActivity from './area-under-curve-activity'
 import EquationChallengeActivity from './equation-challenge-activity'
+import MeasurementRulerActivity from './measurement-ruler-activity'
 import { type PlatformEngineId } from './platform-engine-library'
 import FaradaySimulation from '@/components/admin/faraday-simulation'
 import PendulumSimulation from './pendulum-simulation'
@@ -188,7 +189,6 @@ const getMathActivityPrompt = (topic: MathTopic) => {
     Ratios: `Adjust the recipe to ${topic.target} servings and multiply the ingredients.`,
     Percentages: `Charge the 100-grid battery to ${topic.target}%.`,
     'Factors & Multiples': `Feed ${topic.target} into the machine to reveal its factor pairs.`,
-    Measurement: `Drag the virtual ruler until the measured object reads ${topic.target} units.`,
     Geometry: `Place ${topic.target} vertices to complete the target shape.`,
     Angles: `Rotate the ray until the angle reads ${topic.target}°.`,
     'Perimeter & Area': `Place tiles until the room area is ${topic.target} square units.`,
@@ -723,8 +723,6 @@ const MathActivityEngine: FC<{ topic: MathTopic; onComplete?: () => void }> = ({
   const [checked, setChecked] = useState(false)
   const [chartValues, setChartValues] = useState([4, 5, 6, 7, 8])
   const [selected, setSelected] = useState<string[]>([])
-  const [dragging, setDragging] = useState(false)
-  const [rulerX, setRulerX] = useState(28)
   const correct = value === topic.target
   const update = (next: number) => { setValue(next); setChecked(false) }
   const finish = <TopicCheck correct={correct} checked={checked} onCheck={() => setChecked(true)} onComplete={onComplete} />
@@ -760,19 +758,7 @@ const MathActivityEngine: FC<{ topic: MathTopic; onComplete?: () => void }> = ({
   if (topic.title === 'Vectors') return <VectorPlaygroundActivity topic={topic} onComplete={onComplete} />
   if (topic.title === 'Time') return frame(<><Box component="svg" viewBox="0 0 400 150" sx={{ width: '100%', height: 150, backgroundColor: 'background.default' }}><circle cx="200" cy="75" r="55" fill="none" stroke="currentColor" strokeWidth="3" /><line x1="200" y1="75" x2="200" y2="35" stroke="var(--mui-palette-primary-main)" strokeWidth="5" /><line x1="200" y1="75" x2="245" y2="75" stroke="var(--mui-palette-secondary-main)" strokeWidth="4" /></Box><Slider min={0} max={60} value={value} onChange={(_, next) => update(Array.isArray(next) ? next[0] : next)} aria-label="Time visual control" /><Typography>Live value: {value}</Typography></>)
   if (topic.title === 'Trigonometry') return <UnitCircleSpinnerActivity topic={topic} onComplete={onComplete} />
-  if (topic.title === 'Measurement') {
-    const updateRuler = (event: PointerEvent<HTMLElement>) => {
-      if (!dragging) return
-      const bounds = event.currentTarget.getBoundingClientRect()
-      const nextRulerX = Math.max(0, Math.min(bounds.width - 330, event.clientX - bounds.left - 20))
-      const objectStart = 28
-      const objectEnd = objectStart + topic.target * 26
-      const liveMeasurement = Math.max(0, Math.min(12, Math.round((objectEnd - nextRulerX) / 26)))
-      setRulerX(nextRulerX)
-      update(liveMeasurement)
-    }
-    return frame(<><Typography variant="body2">Drag the ruler alongside the pencil until its zero mark aligns with the pencil tip and the endpoint reads {topic.target} units.</Typography><Box onPointerMove={updateRuler} onPointerUp={() => setDragging(false)} onPointerLeave={() => setDragging(false)} sx={{ position: 'relative', height: 210, overflow: 'hidden', borderRadius: 2, backgroundColor: 'background.default', border: 1, borderColor: 'divider', touchAction: 'none' }}><Box sx={{ position: 'absolute', left: 28, top: 32, width: `${topic.target * 26}px`, height: 28, borderRadius: 3, backgroundColor: '#e5b46a', border: 2, borderColor: '#9a6732', transform: 'rotate(-2deg)' }}><Box sx={{ position: 'absolute', right: -10, top: 7, width: 0, height: 0, borderTop: '7px solid transparent', borderBottom: '7px solid transparent', borderLeft: '12px solid #9a6732' }} /></Box><Typography sx={{ position: 'absolute', left: 30, top: 65, fontSize: 12, fontWeight: 700 }}>Pencil: {topic.target} units</Typography><Box onPointerDown={() => setDragging(true)} sx={{ position: 'absolute', left: rulerX, top: 108, width: 330, height: 48, borderRadius: 1, backgroundColor: '#f6b73c', border: 2, borderColor: '#a86b00', cursor: dragging ? 'grabbing' : 'grab', userSelect: 'none', transition: dragging ? 'none' : 'left .2s ease' }}><Box component="svg" viewBox="0 0 330 48" sx={{ width: '100%', height: '100%' }} aria-label={`Ruler currently reads ${value} units`}>{Array.from({ length: 13 }, (_, index) => <g key={index}><line x1={index * 26} x2={index * 26} y1={index % 5 === 0 ? 5 : 17} y2="40" stroke="#5d4200" strokeWidth="2" /><text x={index * 26 + 2} y="14" fontSize="10" fill="#5d4200">{index}</text></g>)}</Box></Box></Box><Typography role="status" color={correct ? 'success.main' : 'text.secondary'}>Live measurement: <strong>{value} units</strong>{correct ? ' — aligned!' : ' — drag the ruler to the pencil endpoint.'}</Typography></>)
-  }
+  if (topic.title === 'Measurement') return <MeasurementRulerActivity topic={topic} onComplete={onComplete} />
   if (topic.title === 'Patterns') return <PatternTrainActivity topic={topic} onComplete={onComplete} />
   if (topic.title === 'Money') return <ShopSimulatorActivity topic={topic} onComplete={onComplete} />
   if (topic.title === 'Sequences & Series') return <SequenceBuilderActivity topic={topic} onComplete={onComplete} />
