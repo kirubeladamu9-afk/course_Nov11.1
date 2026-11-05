@@ -52,6 +52,7 @@ import SequenceBuilderActivity from './sequence-builder-activity'
 import VectorPlaygroundActivity from './vector-playground-activity'
 import RecipeMixerActivity from './recipe-mixer-activity'
 import ShapeBuilderActivity from './shape-builder-activity'
+import TenFrameBuilderActivity from './ten-frame-builder-activity'
 import TileRoomActivity from './tile-room-activity'
 import DecimalPainterActivity from './decimal-painter-activity'
 import CurveSculptorActivity from './curve-sculptor-activity'
@@ -180,7 +181,6 @@ const getMathActivityPrompt = (topic: MathTopic) => {
   const prompts: Record<string, string> = {
     'Counting & Number Recognition': `Tap bugs and fruits until the garden has ${topic.target} counted objects.`,
     'Comparing Numbers': 'Enter the larger number to tip the seesaw toward the greater quantity.',
-    'Addition & Subtraction': `Move the robot along the number path until it lands on ${topic.target}.`,
     'Place Value': 'Build the requested hundreds, tens, and ones number with blocks.',
     'Multiplication/Division Concepts': 'Arrange equal critter groups, then enter the number of groups.',
     Fractions: `Tap pizza slices to show ${topic.target}/8 of the whole.`,
@@ -757,7 +757,7 @@ const MathActivityEngine: FC<{ topic: MathTopic; onComplete?: () => void }> = ({
   if (topic.title === 'Place Value') return <BaseTenBuilderActivity topic={topic} onComplete={onComplete} />
   if (topic.title === 'Multiplication/Division Concepts') return <ArrayBuilderActivity topic={topic} onComplete={onComplete} />
   if (topic.title === 'Comparing Numbers') return <NumberBalanceActivity topic={topic} onComplete={onComplete} />
-  if (topic.title === 'Addition & Subtraction') return <NumberLineRobotActivity topic={topic} onComplete={onComplete} />
+  if (topic.title === 'Addition & Subtraction') return <TenFrameBuilderActivity topic={topic} onComplete={onComplete} />
   if (topic.title === 'Angles') return <AngleRotatorActivity topic={topic} onComplete={onComplete} />
   if (topic.title === 'Time') return <ClockQuestActivity topic={topic} onComplete={onComplete} />
   if (topic.title === 'Linear Equations') return <LinearEquationActivity topic={topic} onComplete={onComplete} />
