@@ -32,6 +32,7 @@ import {
   sideLengths,
   sidesOf,
 } from './shape-geometry'
+import { CoordinateGridLines, DraggableVertex } from './coordinate-grid-primitives'
 
 const CELL = 25
 const WIDTH = COLS * CELL
@@ -162,12 +163,7 @@ const ShapeBuilderActivity: FC<{ topic: MathTopic; onComplete?: () => void }> = 
               onPointerUp={stopDrag}
               onPointerCancel={stopDrag}
             >
-              {Array.from({ length: COLS + 1 }, (_, index) => (
-                <line key={`v${index}`} x1={index * CELL} y1={0} x2={index * CELL} y2={HEIGHT} stroke="#d5e3df" strokeWidth={1} />
-              ))}
-              {Array.from({ length: ROWS + 1 }, (_, index) => (
-                <line key={`h${index}`} x1={0} y1={index * CELL} x2={WIDTH} y2={index * CELL} stroke="#d5e3df" strokeWidth={1} />
-              ))}
+              <CoordinateGridLines columns={COLS} rows={ROWS} cellSize={CELL} />
               <polygon points={polygon} fill="var(--mui-palette-primary-main)" fillOpacity={0.18} stroke="var(--mui-palette-primary-main)" strokeWidth={3} strokeLinejoin="round" />
 
               {!isName && points.map((point, index) => {
@@ -217,15 +213,13 @@ const ShapeBuilderActivity: FC<{ topic: MathTopic; onComplete?: () => void }> = 
               })}
 
               {points.map((point, index) => (
-                <circle
+                <DraggableVertex
                   key={index}
                   cx={point.x * CELL}
                   cy={point.y * CELL}
-                  r={isName ? 5 : 9}
+                  radius={isName ? 5 : 9}
                   fill={isName ? '#1d6b5f' : 'var(--mui-palette-secondary-main)'}
-                  stroke="#fff"
-                  strokeWidth={3}
-                  style={{ cursor: isName ? 'default' : 'grab' }}
+                  cursor={isName ? 'default' : 'grab'}
                   onPointerDown={isName ? undefined : (event) => startDrag(event, index)}
                 />
               ))}
