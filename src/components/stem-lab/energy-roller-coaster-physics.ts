@@ -5,9 +5,7 @@ export type StepResult = { state: CartState; stopped: boolean; clearedHill2: boo
 export type Energies = { potential: number; kinetic: number; thermal: number; total: number; speed: number }
 
 export const GRAVITY = 9.81
-const TRACK_X = [0, 3, 8, 13, 17, 21, 25, 29, 34, 39, 42]
-const randomInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
-const randomHalf = (min: number, max: number) => (min + Math.floor(Math.random() * (max - min + 1))) / 2
+const TRACK_X = [0, 3, 8, 13, 17, 21, 25, 29, 34, 37, 40, 42]
 
 const monotoneSlopes = (heights: number[]) => heights.map((height, index) => {
   if (index === 0) return (heights[1] - height) / (TRACK_X[1] - TRACK_X[0])
@@ -40,10 +38,9 @@ const sampleCurve = (x: number, heights: number[], slopes: number[]) => {
   return { height, slope }
 }
 
-export const createCoasterTrack = (startHeight: number): Track => {
-  const hill1Height = randomInt(6, 9)
-  const hill2Height = randomInt(10, 14)
-  const heights = [startHeight, startHeight - .5, 4, 2, 3, hill1Height, 3, 1, hill2Height, 3, 2]
+export const createCoasterTrack = (startHeight: number, hills: [number, number]): Track => {
+  const [hill1Height, hill2Height] = hills
+  const heights = [startHeight, startHeight - 1.5, 4, 2, 3, hill1Height, 3, 1, hill2Height, 4, 2, 22]
   const slopes = monotoneSlopes(heights)
   const points: TrackPoint[] = []
   let distance = 0
@@ -68,6 +65,7 @@ export const createCoasterTrack = (startHeight: number): Track => {
       { label: 'Valley 2', s: atX(TRACK_X[7]).s, height: 1 },
       { label: 'Hill 2', s: atX(TRACK_X[8]).s, height: hill2Height },
       { label: 'Valley 3', s: atX(TRACK_X[10]).s, height: 2 },
+      { label: 'End rise', s: atX(TRACK_X[11]).s, height: 22 },
     ],
     startHeight,
     hill1Height,
@@ -107,7 +105,7 @@ export const energiesAt = (track: Track, state: CartState, mass: number): Energi
 
 const availablePerKgAt = (track: Track, s: number, thermalPerKg: number) => GRAVITY * (track.startHeight - sampleTrack(track, s).height) - thermalPerKg
 
-export const advanceCart = (track: Track, state: CartState, friction: number, mass: number, elapsed: number): StepResult => {
+export const advanceCart = (track: Track, state: CartState, friction: number, elapsed: number): StepResult => {
   const duration = Math.min(.05, Math.max(0, elapsed))
   const steps = Math.max(1, Math.ceil(duration / (1 / 120)))
   const dt = duration / steps
@@ -134,28 +132,27 @@ export const advanceCart = (track: Track, state: CartState, friction: number, ma
       break
     }
     const nextS = Math.max(0, Math.min(track.length, current.s + deltaS))
-    const nextPoint = sampleTrack(track, nextS)
     const thermalPerKg = current.thermalPerKg + coefficient * normal * Math.abs(nextS - current.s)
     let resultingS = nextS
     let resultingThermal = thermalPerKg
     if (availablePerKgAt(track, nextS, thermalPerKg) < 0) {
-      let left = current.s
-      let right = nextS
-      for (let search = 0; search < 18; search += 1) {
-        const middle = (left + right) / 2
+      let low = 0
+      let high = 1
+      for (let search = 0; search < 20; search += 1) {
+        const fraction = (low + high) / 2
+        const middle = current.s + (nextS - current.s) * fraction
         const thermalAtMiddle = current.thermalPerKg + coefficient * normal * Math.abs(middle - current.s)
-        const available = availablePerKgAt(track, middle, thermalAtMiddle)
-        if (available >= 0) left = middle
-        else right = middle
+        if (availablePerKgAt(track, middle, thermalAtMiddle) >= 0) low = fraction
+        else high = fraction
       }
-      resultingS = (left + right) / 2
+      resultingS = current.s + (nextS - current.s) * ((low + high) / 2)
       resultingThermal = current.thermalPerKg + coefficient * normal * Math.abs(resultingS - current.s)
     }
     if (direction > 0 && current.s < track.hill2S && resultingS >= track.hill2S) clearedHill2 = true
     const resultPoint = sampleTrack(track, resultingS)
     const remainingEnergy = Math.max(0, availablePerKgAt(track, resultingS, resultingThermal))
     const speed = Math.sqrt(2 * remainingEnergy)
-    const velocityDirection = resultingS === 0 || resultingS === track.length ? 0 : Math.sign(nextVelocityEstimate || deltaS)
+    const velocityDirection = resultingS === 0 || resultingS === track.length || remainingEnergy < 1e-7 ? 0 : Math.sign(nextVelocityEstimate || deltaS)
     current = { s: resultingS, velocity: velocityDirection * speed, thermalPerKg: resultingThermal, maxHeight: Math.max(current.maxHeight, resultPoint.height), clearedHill2 }
     if (resultingS === 0 || resultingS === track.length) {
       current = { ...current, velocity: 0 }
@@ -169,34 +166,73 @@ export const advanceCart = (track: Track, state: CartState, friction: number, ma
 export const fastestLandmark = (track: Track, friction: number) => {
   const coefficient = Math.max(0, Math.min(.2, friction))
   let thermalPerKg = 0
+  let fastestPoint = track.points[0]
+  let fastestSpeedSquared = 0
   let previous = track.points[0]
-  const landmarks = new Map(track.landmarks.map((landmark) => [Math.round(landmark.s * 1000), landmark]))
-  let fastest = { label: 'Start', speed: 0 }
-  const stride = 8
-  for (let index = stride; index < track.points.length; index += stride) {
-    const point = track.points[index]
-    const ds = point.s - previous.s
-    thermalPerKg += coefficient * normalAcceleration(previous.slope) * ds
+  for (const point of track.points.slice(1)) {
+    thermalPerKg += coefficient * normalAcceleration(previous.slope) * (point.s - previous.s)
     const speedSquared = 2 * (GRAVITY * (track.startHeight - point.height) - thermalPerKg)
     if (speedSquared < 0) break
-    const labelAt = [...landmarks.values()].find((landmark) => Math.abs(landmark.s - point.s) < ds * 1.5)
-    if (labelAt && speedSquared > fastest.speed * fastest.speed) fastest = { label: labelAt.label, speed: Math.sqrt(speedSquared) }
+    if (speedSquared > fastestSpeedSquared) {
+      fastestSpeedSquared = speedSquared
+      fastestPoint = point
+    }
     previous = point
   }
-  return fastest.label
+  const landmark = track.landmarks.reduce((closest, current) => Math.abs(current.s - fastestPoint.s) < Math.abs(closest.s - fastestPoint.s) ? current : closest)
+  return landmark.label
 }
 
-export const scrubCart = (track: Track, s: number, mass: number, friction: number): CartState => {
-  const position = Math.max(0, Math.min(track.length, s))
+export const zeroKineticLocation = (track: Track, friction: number) => {
+  const coefficient = Math.max(0, Math.min(.2, friction))
   let thermalPerKg = 0
   let previous = track.points[0]
-  for (const point of track.points) {
+  let previousAvailable = 0
+  for (const point of track.points.slice(1)) {
+    thermalPerKg += coefficient * normalAcceleration(previous.slope) * (point.s - previous.s)
+    const available = availablePerKgAt(track, point.s, thermalPerKg)
+    if (available <= 0) {
+      const fraction = previousAvailable / (previousAvailable - available)
+      const turningS = previous.s + (point.s - previous.s) * fraction
+      const nearest = track.landmarks.reduce((closest, landmark) => Math.abs(landmark.s - turningS) < Math.abs(closest.s - turningS) ? landmark : closest)
+      return `At the start and near ${nearest.label}`
+    }
+    previous = point
+    previousAvailable = available
+  }
+  return 'At the start and at the track end'
+}
+
+export const scrubCart = (track: Track, s: number, friction: number): CartState => {
+  let position = Math.max(0, Math.min(track.length, s))
+  let thermalPerKg = 0
+  let previous = track.points[0]
+  const coefficient = Math.max(0, Math.min(.2, friction))
+  for (const point of track.points.slice(1)) {
     if (point.s > position) break
-    thermalPerKg += Math.max(0, Math.min(.2, friction)) * normalAcceleration(previous.slope) * (point.s - previous.s)
+    const segmentThermal = thermalPerKg + coefficient * normalAcceleration(previous.slope) * (point.s - previous.s)
+    if (availablePerKgAt(track, point.s, segmentThermal) < 0) {
+      let low = 0
+      let high = 1
+      for (let search = 0; search < 20; search += 1) {
+        const fraction = (low + high) / 2
+        const candidateS = previous.s + (point.s - previous.s) * fraction
+        const candidateThermal = thermalPerKg + coefficient * normalAcceleration(previous.slope) * (candidateS - previous.s)
+        if (availablePerKgAt(track, candidateS, candidateThermal) >= 0) low = fraction
+        else high = fraction
+      }
+      position = previous.s + (point.s - previous.s) * ((low + high) / 2)
+      thermalPerKg += coefficient * normalAcceleration(previous.slope) * (position - previous.s)
+      break
+    }
+    thermalPerKg = segmentThermal
     previous = point
   }
-  const available = availablePerKgAt(track, position, thermalPerKg)
+  if (position === s) {
+    const sample = sampleTrack(track, position)
+    const available = Math.max(0, availablePerKgAt(track, position, thermalPerKg))
+    return { s: position, velocity: Math.sqrt(2 * available), thermalPerKg, maxHeight: sample.height, clearedHill2: false }
+  }
   const sample = sampleTrack(track, position)
-  const velocity = Math.sqrt(Math.max(0, 2 * available))
-  return { s: position, velocity, thermalPerKg, maxHeight: sample.height, clearedHill2: position >= track.hill2S }
+  return { s: position, velocity: 0, thermalPerKg, maxHeight: sample.height, clearedHill2: false }
 }
