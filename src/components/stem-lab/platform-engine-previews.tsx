@@ -12,6 +12,7 @@ import { type FC, type ReactNode, useState } from 'react'
 import ForcePlaygroundActivity from './force-playground-activity'
 import MachinePlaygroundActivity from './machine-playground-activity'
 import EnergyRollerCoasterActivity from './energy-roller-coaster-activity'
+import HeatFlowLabActivity from './heat-flow-lab-activity'
 import CircuitBuilderActivity from './circuit-builder-activity'
 import ForceMotionLabActivity from './force-motion-lab-activity'
 import SurfaceTestActivity from './surface-test-activity'
@@ -794,6 +795,7 @@ export const PlatformEnginePreview: FC<{ engineId: PlatformEngineId; onComplete?
   if (engineId === 'cell-zoom' || normalizedTopicTitle === 'Cells') return <CellZoomActivity onComplete={onComplete} />
   if (engineId === 'material-sorter' || normalizedTopicTitle === 'Materials Around Us') return <MaterialSorterActivity onComplete={onComplete} />
   if (engineId === 'state-sorter' || normalizedTopicTitle === 'Solids/Liquids/Gases') return <StateSorterActivity onComplete={onComplete} />
+  if (normalizedTopicTitle === 'Heat Transfer' || engineId === 'heat-flow-lab') return <HeatFlowLabActivity onComplete={onComplete} />
   if (normalizedTopicTitle === 'Heat & Cold') return <ParticleHeatActivity onComplete={onComplete} />
   if (engineId === 'particle-state-simulator' || normalizedTopicTitle === 'States of Matter') return <ParticleStateSimulator onComplete={onComplete} />
   if (engineId === 'solution-builder' || normalizedTopicTitle === 'Solutions' || normalizedTopicTitle === 'Dissolving') return <SolutionBuilderActivity onComplete={onComplete} />

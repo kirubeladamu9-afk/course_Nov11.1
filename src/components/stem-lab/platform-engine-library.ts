@@ -30,6 +30,7 @@ export type PlatformEngineId =
   | 'force-playground'
   | 'machine-playground'
   | 'energy-roller-coaster'
+  | 'heat-flow-lab'
   | 'circuit-builder'
   | 'force-motion-lab'
   | 'surface-test'
@@ -86,6 +87,7 @@ export const PLATFORM_ENGINES: PlatformEngineDefinition[] = [
   { id: 'force-playground', name: 'Force Playground', description: 'Explore how pushing and pulling move objects.', subjects: ['Physics'], examples: ['Pushing everyday objects', 'Comparing weight', 'Heavy and light objects'], interaction: 'Drag objects across a surface and identify which needs the biggest push.' },
   { id: 'machine-playground', name: 'Machine Playground', description: 'Explore the mechanical advantage of a lever.', subjects: ['Physics'], examples: ['Adjusting a fulcrum', 'Balancing torque', 'Comparing effort distance'], interaction: 'Change the fulcrum and use calculated force and distance to move a heavy box.' },
   { id: 'energy-roller-coaster', name: 'Energy Roller Coaster', description: 'Explore how potential and kinetic energy transform on a roller coaster.', subjects: ['Physics'], examples: ['Potential energy', 'Kinetic energy', 'Conservation of energy'], interaction: 'Release a cart and observe calculated energy changes as it climbs and descends hills.' },
+  { id: 'heat-flow-lab', name: 'Heat Flow Lab', description: 'Explore how heat moves between objects.', subjects: ['Physics'], examples: ['Conduction', 'Convection', 'Radiation'], interaction: 'Move objects onto a heat source or into contact and observe temperatures change from a live heat-transfer model.' },
   { id: 'circuit-builder', name: 'Circuit Builder', description: 'Build a working circuit.', subjects: ['Physics'], examples: ['Battery terminals', 'Closed loops', 'Switches and bulbs'], interaction: 'Connect component terminals and close the switch to light the bulb.' },
   { id: 'force-motion-lab', name: 'Force & Motion Lab', description: 'See how forces cause objects to move.', subjects: ['Physics'], examples: ['Applied force', 'Acceleration', 'Speed'], interaction: 'Apply a measured force and observe a cart accelerate across a surface.' },
   { id: 'surface-test', name: 'Surface Test', description: 'Compare how friction differs across surfaces.', subjects: ['Physics'], examples: ['Ice', 'Wood', 'Sandpaper'], interaction: 'Apply the same push and compare how friction changes the block\'s motion.' },

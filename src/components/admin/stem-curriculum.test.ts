@@ -25,7 +25,8 @@ describe('physics topic engine mappings', () => {
     expect(getCurriculumTopicKey('Physics', 'Newton’s Laws')).toBe(getCurriculumTopicKey('Physics', "Newton's Laws"))
   })
 
-  it('uses the heat-specific activity for Heat & Cold', () => {
+  it('routes Heat Transfer to Heat Flow Lab and keeps Heat & Cold on its existing activity', () => {
+    expect(engineForTopic('Physics', 'Heat Transfer')).toBe('heat-flow-lab')
     expect(engineForTopic('Physics', 'Heat & Cold')).toBe('particle-heat')
   })
 })
