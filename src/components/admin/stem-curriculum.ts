@@ -23,7 +23,7 @@ const foundation: MathTopic[] = [
   ['Decimals', 'Connect decimals to fractions using a visual grid.', 'Decimal Painter', 'Shade squares on a 100-grid like a coloring page.', 'slider', 65],
   ['Ratios', 'Explore how ratios scale using everyday recipes.', 'Recipe Mixer', 'Adjust servings and watch ingredient icons multiply together.', 'slider', 4],
   ['Percentages', 'Connect percentages to fractions and real-world proportions.', '100 Grid Charger', 'Fill a battery-style grid as the percentage increases.', 'slider', 75],
-  ['Factors & Multiples', 'Discover number relationships by finding factor pairs.', 'Factor Machine', 'Feed in a number and reveal its factor pairs.', 'input', 24],
+  ['Factors & Multiples', 'Discover number relationships by finding factor pairs.', 'Factor Machine', 'Discover number relationships by finding factor pairs.', 'input', 24],
   ['Measurement', 'Practice measuring length using real-world objects.', 'Virtual Ruler Quest', 'Practice measuring length using real-world objects.', 'slider', 9],
   ['Geometry', 'Construct and explore basic 2D shapes.', 'Shape Builder Workshop', 'Construct and explore basic 2D shapes.', 'count', 4],
   ['Angles', 'See how angles change from acute to straight.', 'Angle Rotator', "Spin a ray with a slider while a character's arm mimics the angle.", 'slider', 90],
