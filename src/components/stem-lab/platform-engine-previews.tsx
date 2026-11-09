@@ -52,6 +52,7 @@ import SequenceBuilderActivity from './sequence-builder-activity'
 import VectorPlaygroundActivity from './vector-playground-activity'
 import RecipeMixerActivity from './recipe-mixer-activity'
 import ShapeBuilderActivity from './shape-builder-activity'
+import ShapeHuntActivity from './shape-hunt-activity'
 import TenFrameBuilderActivity from './ten-frame-builder-activity'
 import NumberBalanceActivity from './number-balance-activity'
 import TileRoomActivity from './tile-room-activity'
@@ -784,6 +785,7 @@ const MathActivityEngine: FC<{ topic: MathTopic; onComplete?: () => void }> = ({
 
 export const PlatformEnginePreview: FC<{ engineId: PlatformEngineId; onComplete?: () => void; mathTopic?: MathTopic; topicTitle?: string }> = ({ engineId, onComplete, mathTopic, topicTitle }) => {
   const normalizedTopicTitle = topicTitle?.trim().replace(/[’‘]/g, "'")
+  if (normalizedTopicTitle === 'Shapes Around Us') return <ShapeHuntActivity onComplete={onComplete} />
   if (mathTopic) return <MathActivityEngine topic={mathTopic} onComplete={onComplete} />
   if (engineId === 'formula-builder' || normalizedTopicTitle === 'Chemical Formulae') return <FormulaBuilderActivity onComplete={onComplete} />
   if (engineId === 'photosynthesis-lab' || normalizedTopicTitle === 'Photosynthesis') return <PhotosynthesisLabActivity onComplete={onComplete} />
