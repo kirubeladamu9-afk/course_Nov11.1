@@ -13,6 +13,8 @@ import { getLatestSubmittedQuizAttempts } from './quiz-performance.js'
 import { areSolverFollowUpsComplete, areSolverProblemsComplete, getStepByStepSolverSessionView, isValidStepByStepSolverConfig, normalizeSolverAnswer } from './step-by-step-solver-engine.js'
 import { expireQuizAnswers, getQuizDeadline, getQuizTimeLimitSeconds, hasScheduledClassQuizzes, isQuizExpired } from './quiz-timing.js'
 import { generateVerificationCode, hashVerificationCode, isValidEmailAddress, sendEnrollmentVerificationEmail, verificationCodeLifetimeMinutes, verificationIpMaxRequests, verificationIpWindowMinutes, verificationMaxIncorrectAttempts, verificationResendCooldownSeconds, verifiedEnrollmentWindowMinutes } from './enrollment-verification.js'
+import { createRequestRateLimiter } from './request-rate-limit.js'
+import { toPublicCoursePreview } from './public-course-preview.js'
 
 const databaseUrl = process.env.DATABASE_URL
 
@@ -36,7 +38,6 @@ app.use(helmet({
   hsts: false,
   contentSecurityPolicy: {
     useDefaults: true,
-    reportOnly: true,
     directives: {
       'default-src': ["'self'"],
       'script-src': ["'self'", 'https://challenges.cloudflare.com'],
@@ -50,11 +51,17 @@ app.use(helmet({
     },
   },
 }))
+app.use((_request, response, next) => {
+  response.setHeader('Strict-Transport-Security', 'max-age=31536000')
+  next()
+})
 app.use(compression())
 const port = Number(process.env.PORT ?? 3001)
 const distDirectory = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../dist')
 const isTestChapa = process.env.CHAPA_MODE !== 'live'
 const sessionCookieName = 'coursespace-session'
+const signUpRateLimit = createRequestRateLimiter({ limit: 10, windowMs: 15 * 60 * 1000 })
+const cspReportRateLimit = createRequestRateLimiter({ limit: 10, windowMs: 60 * 1000 })
 const deviceCookieName = 'coursespace-device'
 const sessionPolicies = {
   student: { idleMs: 14 * 86400000, absoluteMs: 60 * 86400000, maxSessions: 3 },
@@ -2247,6 +2254,8 @@ const updatePaymentStatus = async (reference, status, verification = {}) => sql.
   return 'paid'
 })
 
+app.use('/api/csp-report', cspReportRateLimit, express.json({ limit: '64kb', type: ['application/json', 'application/csp-report', 'application/reports+json'] }))
+app.use('/api/auth/sign-up', signUpRateLimit, express.json({ limit: '32kb' }))
 app.use(express.json({ limit: '30mb' }))
 
 const toCspReportText = (value) => String(value ?? '').slice(0, 500)
@@ -2262,16 +2271,15 @@ const parseCspReports = (body) => (Array.isArray(body) ? body : [body]).flatMap(
   }]
 }).slice(0, 20)
 
-app.post('/api/csp-report', express.json({ type: ['application/csp-report', 'application/reports+json'] }), async (request, response) => {
-  const reports = parseCspReports(request.body)
-  console.warn('CSP violation report', JSON.stringify(reports))
+app.post('/api/csp-report', async (request, response) => {
+  const reports = parseCspReports(request.body).slice(0, 5)
   for (const report of reports) {
     await sql`
       INSERT INTO csp_violation_reports (document_url, violated_directive, blocked_url, source_file)
       VALUES (${report.document_url}, ${report.violated_directive}, ${report.blocked_url}, ${report.source_file})
     `
   }
-  response.status(204).end()
+  return response.status(204).end()
 })
 
 app.get('/api/health', async (_request, response) => {
@@ -2529,7 +2537,7 @@ app.get('/api/courses/:id', async (request, response) => {
 
   const course = await readCourse(id, true)
   if (!course) return response.status(404).json({ message: 'Course not found.' })
-  return response.json(sanitizeCourseForLearner(course))
+  return response.json(toPublicCoursePreview(course))
 })
 
 app.get('/api/students', requireAuthenticated, async (request, response) => {
@@ -7123,6 +7131,7 @@ const cleanSecurityRecords = async () => {
     sql`DELETE FROM admin_audit_log WHERE created_at < NOW() - INTERVAL '1 year'`,
     sql`DELETE FROM password_reset_tokens WHERE expires_at < NOW() - INTERVAL '30 days' OR used_at < NOW() - INTERVAL '30 days'`,
     sql`DELETE FROM access_import_batches WHERE created_at < NOW() - INTERVAL '1 day'`,
+    sql`DELETE FROM csp_violation_reports WHERE created_at < NOW() - INTERVAL '30 days'`,
   ])
 }
 

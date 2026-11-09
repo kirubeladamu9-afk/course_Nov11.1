@@ -1,10 +1,18 @@
-import { type AdminCourse, type AdminModule, type AdminTutor, type AdminUser } from '@/components/admin/admin-data'
+import { type AdminCourse, type AdminLesson, type AdminModule, type AdminTutor, type AdminUser } from '@/components/admin/admin-data'
 import { type Course } from '@/interfaces/course'
 import { type ArticleContentBlock, type ArticleVocabularyEntry, type SimulationConfig, type StepByStepSolverLearnerConfig, type StepByStepSolverSession, type StepByStepSolverState } from '@/components/admin/admin-data'
 import { type PracticeExam, type PracticeExamWithQuestions, type PracticePurchase, type PracticeQuestion } from '@/components/practice/practice-data'
 import { type LearnerArticleCheckpoint } from '@/lib/article-checkpoints'
 import { navigateTo } from '@/lib/navigation'
 import { readClientHints } from '@/lib/client-hints'
+
+export type PublicCoursePreview = Omit<AdminCourse, 'modules'> & {
+  modules: Array<{
+    id: number
+    title: string
+    lessons: Array<Pick<AdminLesson, 'id' | 'title' | 'type' | 'duration' | 'estimatedDuration' | 'resources'> & { resources: []; resourceCount: number }>
+  }>
+}
 
 export interface AuthUser {
   id: number | string
@@ -545,7 +553,7 @@ const requestApi = async (url: string, init?: RequestInit) => {
   return response
 }
 
-const requestCourse = async (url: string, init?: RequestInit): Promise<AdminCourse> => {
+const requestCourse = async <T = AdminCourse>(url: string, init?: RequestInit): Promise<T> => {
   const response = await requestApi(url, init)
   if (!response.ok) throw new Error(await getErrorMessage(response))
   return response.json()
@@ -1455,7 +1463,7 @@ export const changePassword = async (currentPassword: string, newPassword: strin
   if (!response.ok) throw new Error(await getErrorMessage(response))
 }
 
-export const getCourse = async (id: Course['id']): Promise<AdminCourse> => requestCourse(`/api/courses/${id}`)
+export const getCourse = async (id: Course['id']): Promise<PublicCoursePreview> => requestCourse<PublicCoursePreview>(`/api/courses/${id}`)
 
 export const submitCredentials = async (mode: 'sign-in' | 'sign-up', email: string, password: string, accountDetails?: AccountDetails, challenges: { captchaToken?: string; twoFactorCode?: string } = {}): Promise<AuthResponse> => {
   const response = await fetch(`/api/auth/${mode}`, {

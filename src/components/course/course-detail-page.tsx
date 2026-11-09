@@ -18,11 +18,14 @@ import VideoLibraryOutlinedIcon from '@mui/icons-material/VideoLibraryOutlined'
 import FormatListNumberedOutlinedIcon from '@mui/icons-material/FormatListNumberedOutlined'
 import { type FC, useEffect, useState } from 'react'
 import { type AdminCourse, type AdminLesson } from '@/components/admin/admin-data'
+import { type PublicCoursePreview } from '@/services/api'
 import EnrollmentModal from '@/components/course/enrollment-modal'
 import CourseReviews from '@/components/course/course-reviews'
 import Footer from '@/components/footer/footer'
 import { getAuthenticatedUser, getAdminCourse, getCourse as getCourseFromApi } from '@/services/api'
 import { navigateTo } from '@/lib/navigation'
+
+type CourseDetailLesson = AdminLesson & { resourceCount?: number }
 
 const formatDuration = (seconds: number) => {
   const totalMinutes = Math.max(1, Math.round(seconds / 60))
@@ -31,7 +34,7 @@ const formatDuration = (seconds: number) => {
   return hours ? `${hours}h${minutes ? ` ${minutes}m` : ''}` : `${minutes}m`
 }
 
-const getLessonLabel = (lesson: AdminLesson) => {
+const getLessonLabel = (lesson: Pick<AdminLesson, 'type' | 'duration'>) => {
   if (lesson.type === 'video') return lesson.duration ? formatDuration(lesson.duration) : 'Video'
   if (lesson.type === 'article') return 'Article'
   if (lesson.type === 'interactive') return 'Interactive'
@@ -49,7 +52,7 @@ const LessonTypeIcon: FC<{ type: AdminLesson['type'] }> = ({ type }) => {
 }
 
 const CourseDetailPage: FC<{ courseId: string }> = ({ courseId }) => {
-  const [course, setCourse] = useState<AdminCourse | null>(null)
+  const [course, setCourse] = useState<AdminCourse | PublicCoursePreview | null>(null)
   const [expandedModules, setExpandedModules] = useState<number[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isEnrollmentOpen, setIsEnrollmentOpen] = useState(false)
@@ -91,12 +94,12 @@ const CourseDetailPage: FC<{ courseId: string }> = ({ courseId }) => {
     return <Container maxWidth="lg" sx={{ py: 12, textAlign: 'center' }}><Typography variant="h4" sx={{ mb: 1 }}>Course not found</Typography><Typography color="text.secondary" sx={{ mb: 3 }}>This course may have been removed or is not available yet.</Typography><Button variant="contained" onClick={() => navigateTo('/')}>Back to courses</Button></Container>
   }
 
-  const lessons = course.modules.flatMap((module) => module.lessons)
+  const lessons = course.modules.flatMap<CourseDetailLesson>((module) => module.lessons)
   const videoLessons = lessons.filter((lesson) => lesson.type === 'video')
   const totalVideoSeconds = videoLessons.reduce((total, lesson) => total + (lesson.duration ?? 0), 0)
   const totalDurationSeconds = lessons.reduce((total, lesson) => total + (lesson.duration ?? lesson.estimatedDuration ?? 0), 0)
-  const resourceCount = lessons.reduce((total, lesson) => total + lesson.resources.length, 0)
-  const firstVideo = videoLessons[0]
+  const resourceCount = lessons.reduce((total, lesson) => total + (lesson.resourceCount ?? lesson.resources.length), 0)
+  const firstVideo = videoLessons.find((lesson) => 'videoUrl' in lesson && Boolean(lesson.videoUrl))
   const allExpanded = course.modules.length > 0 && expandedModules.length === course.modules.length
 
   const toggleExpandAll = () => setExpandedModules(allExpanded ? [] : course.modules.map((module) => module.id))
