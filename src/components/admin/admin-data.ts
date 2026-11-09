@@ -131,6 +131,9 @@ export interface AdminLesson {
   duration: number | null
   videoUrl?: string
   thumbnailUrl?: string
+  captionsVtt?: string
+  captionLanguage?: string
+  transcript?: string
   resources: LessonResource[]
   articleBody?: string
   articleBlocks?: ArticleContentBlock[]

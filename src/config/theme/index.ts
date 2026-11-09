@@ -1,16 +1,31 @@
-import { alpha, createTheme as createMuiTheme, type Theme } from '@mui/material/styles'
+import { alpha, createTheme as createMuiTheme, type Theme, type TypographyOptions } from '@mui/material/styles'
 import typography from './typography'
 import paletteBase from './palette-base'
 import paletteLight from './palette-light'
 import paletteDark from './palette-dark'
 import shadows from './shadows'
 
-const createTheme = (darkMode = false): Theme => {
-  const palette = darkMode ? { ...paletteBase, ...paletteDark } : { ...paletteBase, ...paletteLight }
+const createTheme = (darkMode = false, highContrast = false, textSize: 'normal' | 'large' = 'normal'): Theme => {
+  const basePalette = darkMode ? { ...paletteBase, ...paletteDark } : { ...paletteBase, ...paletteLight }
+  const palette = highContrast ? {
+    ...basePalette,
+    primary: { ...basePalette.primary, main: darkMode ? '#9ff1d2' : '#00584f', dark: darkMode ? '#c8ffe8' : '#003d37', contrastText: darkMode ? '#000000' : '#ffffff' },
+    secondary: { ...basePalette.secondary, main: darkMode ? '#ffe08a' : '#754000', dark: darkMode ? '#fff0bf' : '#512b00', contrastText: darkMode ? '#000000' : '#ffffff' },
+    background: { default: darkMode ? '#000000' : '#ffffff', paper: darkMode ? '#000000' : '#ffffff' },
+    text: { primary: darkMode ? '#ffffff' : '#000000', secondary: darkMode ? '#ffffff' : '#000000', disabled: darkMode ? '#d0d0d0' : '#333333' },
+    divider: darkMode ? '#ffffff' : '#000000',
+    action: { ...basePalette.action, hover: darkMode ? '#262626' : '#eeeeee', selected: darkMode ? '#404040' : '#dddddd', focus: darkMode ? '#595959' : '#cccccc' },
+  } : basePalette
+  const accessibleTypography = textSize === 'large'
+    ? Object.fromEntries(Object.entries(typography).map(([key, value]) => {
+      if (typeof value !== 'object' || !value || !('fontSize' in value) || value.fontSize === undefined) return [key, value]
+      return [key, { ...value, fontSize: typeof value.fontSize === 'number' ? value.fontSize * 1.2 : `calc(${value.fontSize} * 1.2)` }]
+    })) as TypographyOptions
+    : typography
 
   return createMuiTheme({
     palette,
-    typography,
+    typography: accessibleTypography,
     shadows,
     components: {
       MuiCssBaseline: {
