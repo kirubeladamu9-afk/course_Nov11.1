@@ -12,10 +12,6 @@ import Typography from '@mui/material/Typography'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import CloseIcon from '@mui/icons-material/Close'
-import EventAvailableIcon from '@mui/icons-material/EventAvailable'
-import MenuBookIcon from '@mui/icons-material/MenuBook'
-import SchoolIcon from '@mui/icons-material/School'
-import { alpha } from '@mui/material/styles'
 import { type FC, useEffect, useMemo, useState } from 'react'
 import { toast } from '@/components/toast'
 import EnrollmentModal from '@/components/course/enrollment-modal'
@@ -36,8 +32,7 @@ interface ProgramDefinition {
   priceDetail: string
   description: string
   features: string[]
-  accent: string
-  icon: React.ReactNode
+  image: string
 }
 
 const programs: ProgramDefinition[] = [
@@ -49,8 +44,7 @@ const programs: ProgramDefinition[] = [
     priceDetail: '/ package',
     description: 'Live, engaging online classes designed to build confidence and sharpen thinking with guided instruction and practice.',
     features: ['Ages 8–18', 'Live online instruction', 'Flexible scheduling after payment'],
-    accent: '#127C71',
-    icon: <SchoolIcon sx={{ fontSize: 72 }} />,
+    image: '/images/training-programs/international-online-interactive.webp',
   },
   {
     id: 'summer-camp',
@@ -60,8 +54,7 @@ const programs: ProgramDefinition[] = [
     priceDetail: '/ package',
     description: 'Make school breaks count with focused, social learning in small live cohorts.',
     features: ['Small live learning groups', 'Weekday camp schedules', 'Tutor-led practice and support'],
-    accent: '#D0821C',
-    icon: <EventAvailableIcon sx={{ fontSize: 72 }} />,
+    image: '/images/training-programs/summer-camp.webp',
   },
   {
     id: 'ministry-exam-prep',
@@ -71,8 +64,7 @@ const programs: ProgramDefinition[] = [
     priceDetail: '/ package',
     description: 'Structured revision and exam-focused support aligned to each learner’s grade level.',
     features: ['Grade-specific preparation', 'Linked course curriculum', 'Small-group exam support'],
-    accent: '#127C71',
-    icon: <MenuBookIcon sx={{ fontSize: 72 }} />,
+    image: '/images/training-programs/ministry-exam-prep.webp',
   },
 ]
 
@@ -232,8 +224,8 @@ const ProgramCard: FC<ProgramCardProps> = ({ program, classes, onEnroll }) => {
   return (
     <Card elevation={0} sx={{ position: 'relative', height: '100%', overflow: 'hidden', p: 2, borderRadius: 4, backgroundColor: 'background.paper', transition: (theme) => theme.transitions.create(['box-shadow']), '&:hover': { boxShadow: 2 } }}>
       <CardContent sx={{ height: '100%', display: 'flex', flexDirection: 'column', p: 0, '&:last-child': { pb: 0 } }}>
-        <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', height: 200, mb: 2, borderRadius: 3, overflow: 'hidden', color: program.accent, backgroundColor: alpha(program.accent, 0.12) }}>
-          {program.icon}
+        <Box sx={{ position: 'relative', height: 200, mb: 2, borderRadius: 3, overflow: 'hidden', backgroundColor: 'background.default' }}>
+          <Box component="img" src={program.image} alt="" sx={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover' }} />
           <Chip label={program.eyebrow} size="small" sx={{ position: 'absolute', top: 12, left: 12, backgroundColor: 'background.paper', fontSize: 11 }} />
         </Box>
         <Typography component="h3" variant="h4" sx={{ fontSize: '1.4rem', mb: 0.75 }}>{program.title}</Typography>
