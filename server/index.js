@@ -579,7 +579,7 @@ const initializeDatabase = async () => {
   await sql`
     CREATE TABLE IF NOT EXISTS classes (
       id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-      program_id TEXT NOT NULL CHECK (program_id IN ('international-online-interactive', 'summer-camp', 'ministry-exam-prep')),
+      program_id TEXT NOT NULL CHECK (program_id IN ('international-online-interactive', 'summer-camp', 'ministry-exam-prep', 'other')),
       title TEXT NOT NULL,
       cover TEXT NOT NULL DEFAULT '',
       tutor_id BIGINT REFERENCES tutors(id) ON DELETE SET NULL,
@@ -601,6 +601,8 @@ const initializeDatabase = async () => {
     grade_level: 'SMALLINT CHECK (grade_level BETWEEN 1 AND 12)',
     exam_date: 'DATE',
   })
+  await sql`ALTER TABLE classes DROP CONSTRAINT IF EXISTS classes_program_id_check`
+  await sql`ALTER TABLE classes ADD CONSTRAINT classes_program_id_check CHECK (program_id IN ('international-online-interactive', 'summer-camp', 'ministry-exam-prep', 'other'))`
   await sql`
     CREATE TABLE IF NOT EXISTS course_reviews (
       id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -6445,7 +6447,7 @@ app.put('/api/admin/syllabus-topics/grades/:grade/order', requireAdmin, async (r
   return response.json(await sql`SELECT ${syllabusTopicColumns} FROM syllabus_topics WHERE grade = ${grade} ORDER BY position`)
 })
 
-const classPrograms = ['international-online-interactive', 'summer-camp', 'ministry-exam-prep']
+const classPrograms = ['international-online-interactive', 'summer-camp', 'ministry-exam-prep', 'other']
 const classStatuses = ['pending_schedule', 'open', 'full', 'closed']
 
 const isValidClassDate = (value) => {
@@ -6642,7 +6644,7 @@ app.get('/api/admin/classes', requireAdmin, async (_request, response) => {
 
 app.post('/api/admin/classes', requireAdmin, async (request, response) => {
   const classPayload = parseClassPayload(request.body)
-  if (!classPayload || classPayload.grade_level === null) return response.status(400).json({ message: 'Enter valid class details.' })
+  if (!classPayload || (classPayload.program_id !== 'other' && classPayload.grade_level === null)) return response.status(400).json({ message: 'Enter valid class details.' })
   if (classPayload.program_id === 'ministry-exam-prep' && classPayload.exam_date === null) return response.status(400).json({ message: 'Enter an exam date for this Ministry Exam Prep class.' })
   try {
     const [created] = await sql`

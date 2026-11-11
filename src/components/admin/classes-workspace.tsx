@@ -42,7 +42,7 @@ import { getNextLessonId, type AdminCourse, type AdminLesson, type AdminModule, 
 import { CourseEditor } from './admin-dashboard'
 import AdminDataTable, { type DataColumn } from './admin-data-table'
 
-export type ProgramId = 'international-online-interactive' | 'summer-camp' | 'ministry-exam-prep'
+export type ProgramId = 'international-online-interactive' | 'summer-camp' | 'ministry-exam-prep' | 'other'
 type ClassStatus = 'pending_schedule' | 'open' | 'full' | 'closed'
 type EnrollmentStatus = 'enrolled' | 'waitlisted'
 type ClassesView = 'pending' | 'active' | 'new' | 'detail'
@@ -120,9 +120,10 @@ const programLabels: Record<ProgramId, string> = {
   'international-online-interactive': 'International Online Interactive',
   'summer-camp': 'Summer Camp',
   'ministry-exam-prep': 'Ministry Exam Prep',
+  other: 'Other',
 }
 
-const manageablePrograms: ProgramId[] = ['summer-camp', 'ministry-exam-prep']
+const manageablePrograms: ProgramId[] = ['summer-camp', 'ministry-exam-prep', 'other']
 let tutors: TutorOption[] = []
 
 const getTodayInputValue = () => new Date().toISOString().slice(0, 10)
@@ -302,7 +303,7 @@ export const ClassEditorDialog: FC<{ classRecord: AdminClass | null; open: boole
 
   const fixedStartDate = classRecord ? normalizeSchedule(classRecord.schedule).startDate : undefined
   const classDateValidation = getDateValidation(values.schedule, fixedStartDate)
-  const canSave = Boolean((classRecord || values.grade_level !== null) && (classRecord || values.program_id !== 'ministry-exam-prep' || values.exam_date !== null) && values.title.trim() && values.tutor_id >= 1 && values.capacity >= 1 && values.schedule.startDate && values.schedule.endDate && values.schedule.days.length && !classDateValidation.startInPast && !classDateValidation.endInPast && !classDateValidation.endBeforeStart)
+  const canSave = Boolean((classRecord || values.program_id === 'other' || values.grade_level !== null) && (classRecord || values.program_id !== 'ministry-exam-prep' || values.exam_date !== null) && values.title.trim() && values.tutor_id >= 1 && values.capacity >= 1 && values.schedule.startDate && values.schedule.endDate && values.schedule.days.length && !classDateValidation.startInPast && !classDateValidation.endInPast && !classDateValidation.endBeforeStart)
   const handleThumbnailFile = (file: File) => {
     const supportedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/avif']
     if (!supportedTypes.includes(file.type)) {
@@ -330,7 +331,7 @@ export const ClassEditorDialog: FC<{ classRecord: AdminClass | null; open: boole
         <Stack spacing={2.5}>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
             <TextField required fullWidth label="Title" value={values.title} onChange={(event) => setValues({ ...values, title: event.target.value })} />
-            <FormControl fullWidth required><InputLabel>Program</InputLabel><Select label="Program" value={values.program_id} onChange={(event) => setValues({ ...values, program_id: event.target.value as ProgramId, grade_level: null, exam_date: null })}>{selectablePrograms.map((program) => <MenuItem key={program} value={program}>{programLabels[program]}</MenuItem>)}</Select></FormControl><FormControl fullWidth required error={isOffStandardGrade || (!classRecord && values.grade_level === null)}><InputLabel>Grade Level</InputLabel><Select label="Grade Level" value={values.grade_level ?? ''} onChange={(event) => setValues({ ...values, grade_level: Number(event.target.value) })}>{gradeOptions.map((grade) => <MenuItem key={grade} value={grade}>Grade {grade}</MenuItem>)}{isOffStandardGrade && <MenuItem value={values.grade_level ?? ''}>Grade {values.grade_level} (outside exam grades)</MenuItem>}</Select>{!classRecord && values.grade_level === null && <FormHelperText>Select a grade level for this program</FormHelperText>}{isOffStandardGrade && <FormHelperText>This class has a grade outside the standard exam grades — please update it</FormHelperText>}</FormControl>
+            <FormControl fullWidth required><InputLabel>Program</InputLabel><Select label="Program" value={values.program_id} onChange={(event) => setValues({ ...values, program_id: event.target.value as ProgramId, grade_level: null, exam_date: null })}>{selectablePrograms.map((program) => <MenuItem key={program} value={program}>{programLabels[program]}</MenuItem>)}</Select></FormControl>{values.program_id !== 'other' && <FormControl fullWidth required error={isOffStandardGrade || (!classRecord && values.grade_level === null)}><InputLabel>Grade Level</InputLabel><Select label="Grade Level" value={values.grade_level ?? ''} onChange={(event) => setValues({ ...values, grade_level: Number(event.target.value) })}>{gradeOptions.map((grade) => <MenuItem key={grade} value={grade}>Grade {grade}</MenuItem>)}{isOffStandardGrade && <MenuItem value={values.grade_level ?? ''}>Grade {values.grade_level} (outside exam grades)</MenuItem>}</Select>{!classRecord && values.grade_level === null && <FormHelperText>Select a grade level for this program</FormHelperText>}{isOffStandardGrade && <FormHelperText>This class has a grade outside the standard exam grades — please update it</FormHelperText>}</FormControl>}
           </Stack>
           <Stack spacing={1}>
             <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>Class thumbnail</Typography>

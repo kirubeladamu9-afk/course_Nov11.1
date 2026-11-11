@@ -1265,7 +1265,7 @@ export const deleteAdminTutor = async (id: AdminTutor['id']) => {
   if (!response.ok) throw new Error(await getErrorMessage(response))
 }
 
-export type AdminClassProgram = 'international-online-interactive' | 'summer-camp' | 'ministry-exam-prep'
+export type AdminClassProgram = 'international-online-interactive' | 'summer-camp' | 'ministry-exam-prep' | 'other'
 export type AdminClassStatus = 'pending_schedule' | 'open' | 'full' | 'closed'
 
 export interface AdminClassSchedule {
