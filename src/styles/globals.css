@@ -66,6 +66,14 @@ body {
   height: auto;
 }
 
+html.home-section-snap {
+  scroll-snap-type: y proximity;
+}
+
+html.home-section-snap main > *:not(header) {
+  scroll-snap-align: start;
+}
+
 .page-loading-state {
   display: flex;
   align-items: center;

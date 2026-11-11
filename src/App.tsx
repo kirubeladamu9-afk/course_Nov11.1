@@ -180,6 +180,13 @@ const App: React.FC<AppProps> = ({ darkMode, onToggleDarkMode }) => {
     }
   }, [currentPath, isAboutPath, isAdminPath, isBookstorePath, isContactPath, isDashboardPath, isPracticeCatalogPath, isSecurityPath, isTutorPath, practiceExamMatch])
 
+  const isHomePath = /^\/?$/.test(currentPath)
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('home-section-snap', isHomePath)
+    return () => document.documentElement.classList.remove('home-section-snap')
+  }, [isHomePath])
+
   if ((isAdminPath && !canAccessAdmin) || (isTutorPath && !canAccessTutor) || (isSecurityPath && !isAuthenticated) || (isDashboardPath && (!isAuthenticated || currentUser?.role === 'admin' || currentUser?.role === 'tutor')) || (isAuthenticated && isPublicPath)) return <RouteLoadingState message="Returning to Coursespace..." />
   if (isSecurityPath) return <RouteSuspense><Container maxWidth="lg" sx={{ py: { xs: 3, md: 6 } }}><Button onClick={() => navigateTo(currentUser?.role === 'admin' ? '/admin' : currentUser?.role === 'tutor' ? '/tutor' : '/dashboard')} sx={{ mb: 3 }}>Back to dashboard</Button><AccountSecurity /></Container></RouteSuspense>
   if (isAdminPath) return <RouteSuspense><AdminDashboard darkMode={darkMode} onToggleDarkMode={onToggleDarkMode} /></RouteSuspense>
