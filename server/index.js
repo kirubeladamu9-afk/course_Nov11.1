@@ -2757,7 +2757,7 @@ app.get('/api/enrollments', requireAuthenticated, async (request, response) => {
       WHERE enrollment_id = enrollments.id
     ) AS study_plan_summary ON true
     WHERE enrollments.user_id = ${request.userId}
-      AND ((enrollments.class_status IS NULL AND enrollments.course_id IS NOT NULL) OR classes.published = true)
+      AND ((enrollments.class_status IS NULL AND enrollments.course_id IS NOT NULL AND courses.status = 'Published') OR classes.published = true)
       AND ${enrollmentAccessCondition()}
     ORDER BY lesson_summary."lastActivityAt" DESC NULLS LAST, enrollments.created_at DESC
   `
@@ -2776,6 +2776,7 @@ const getOwnedEnrollment = async (transaction, userId, enrollmentId) => {
     LEFT JOIN classes ON classes.id = enrollments.class_id
     WHERE enrollments.id = ${enrollmentId}
       AND enrollments.user_id = ${userId}
+      AND (enrollments.class_id IS NOT NULL OR courses.status = 'Published')
       AND ${enrollmentAccessCondition()}
     FOR UPDATE OF enrollments
   `
