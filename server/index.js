@@ -6334,9 +6334,16 @@ app.delete('/api/admin/courses/:id', requireAdmin, async (request, response) => 
   const id = parseCourseId(request.params.id)
   if (id === null) return response.status(400).json({ message: 'Invalid course id.' })
 
-  const [deleted] = await sql`DELETE FROM courses WHERE id = ${id} RETURNING id`
-  if (!deleted) return response.status(404).json({ message: 'Course not found.' })
-  return response.status(204).end()
+  try {
+    const [deleted] = await sql`DELETE FROM courses WHERE id = ${id} RETURNING id`
+    if (!deleted) return response.status(404).json({ message: 'Course not found.' })
+    return response.status(204).end()
+  } catch (error) {
+    if (error.code === '23503') {
+      return response.status(409).json({ message: 'This course has enrollments or payments and cannot be deleted. Unpublish it instead to hide it from students.' })
+    }
+    throw error
+  }
 })
 
 const syllabusGrades = [6, 8, 12]
