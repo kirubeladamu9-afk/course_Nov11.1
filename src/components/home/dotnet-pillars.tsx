@@ -62,8 +62,8 @@ const DotNetPillars: FC = () => (
     <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1, width: '90%', maxWidth: 1140, px: '0 !important' }}>
       <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', md: 'flex-end' }, gap: { xs: 2, md: 4 }, mb: 3.5 }}>
         <Box>
-          <Typography variant="overline" sx={{ display: 'block', mb: 0.5, color: '#57b9ad', fontSize: 10, fontWeight: 800, letterSpacing: '0.22em', lineHeight: 1.4 }}>WHAT YOU’LL MASTER</Typography>
-          <Typography id="dotnet-pillars-title" component="h2" sx={{ maxWidth: 480, fontSize: { xs: '2rem', md: '2.5rem' }, fontWeight: 800, lineHeight: 1.05, letterSpacing: '-0.035em' }}>Six pillars of .NET development</Typography>
+          <Typography variant="overline" sx={{ display: 'block', mb: 0.5, color: '#57b9ad', fontSize: 10, fontWeight: 800, letterSpacing: '0.22em', lineHeight: 1.4 }}>WHAT YOU’LL CREATE</Typography>
+          <Typography id="dotnet-pillars-title" component="h2" sx={{ maxWidth: 480, fontSize: { xs: '2rem', md: '2.5rem' }, fontWeight: 800, lineHeight: 1.05, letterSpacing: '-0.035em' }}>Six real-world .NET engineering</Typography>
         </Box>
         <Typography color="text.secondary" sx={{ maxWidth: 300, pb: 0.35, fontSize: '0.875rem', lineHeight: 1.5 }}>Hands-on projects, not endless theory. Build real software from week one.</Typography>
       </Box>
