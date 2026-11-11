@@ -13,42 +13,42 @@ import RocketLaunchOutlinedIcon from '@mui/icons-material/RocketLaunchOutlined'
 const pillars = [
   {
     title: 'Desktop with WPF',
-    description: 'Native Windows apps with rich UI, MVVM architecture, and system integration.',
+    description: 'Build Windows desktop apps with MVVM, data binding, and system integration.',
     icon: <DesktopWindowsOutlinedIcon fontSize="small" />,
     color: '#4f6fae',
     background: '#eef2f9',
   },
   {
     title: 'Web with ASP.NET Core',
-    description: 'REST APIs, server-rendered pages, and Razor on the high-performance .NET runtime.',
+    description: 'Create REST APIs and Razor web apps on the .NET runtime.',
     icon: <LanguageOutlinedIcon fontSize="small" />,
     color: '#238b82',
     background: '#eaf6f4',
   },
   {
     title: 'Blazor — C# in browser',
-    description: 'Interactive web UIs without JavaScript. Server or WebAssembly mode.',
+    description: 'Build a live dashboard in C# with Blazor WebAssembly.',
     icon: <LayersOutlinedIcon fontSize="small" />,
     color: '#8256b5',
     background: '#f3eff9',
   },
   {
     title: 'EF Core & SQL',
-    description: 'Model data, query with LINQ, run migrations on SQL Server or PostgreSQL.',
+    description: 'Design a database, query with LINQ, and manage migrations on SQL Server.',
     icon: <StorageOutlinedIcon fontSize="small" />,
     color: '#39826f',
     background: '#edf6f2',
   },
   {
     title: 'Auth & Security',
-    description: 'JWT, Identity, OAuth, role-based access — production patterns from day one.',
+    description: 'Secure logins with JWT, Identity, and role-based access for users.',
     icon: <SecurityOutlinedIcon fontSize="small" />,
     color: '#526a9c',
     background: '#eef1f8',
   },
   {
     title: 'Deploy anywhere',
-    description: 'Docker, Azure, AWS, Linux servers — package and ship apps with confidence.',
+    description: 'Publish your app with Docker to Azure, AWS, or Linux servers.',
     icon: <RocketLaunchOutlinedIcon fontSize="small" />,
     color: '#328b85',
     background: '#eaf6f5',
@@ -65,7 +65,7 @@ const DotNetPillars: FC = () => (
           <Typography variant="overline" sx={{ display: 'block', mb: 0.5, color: '#57b9ad', fontSize: 10, fontWeight: 800, letterSpacing: '0.22em', lineHeight: 1.4 }}>WHAT YOU’LL CREATE</Typography>
           <Typography id="dotnet-pillars-title" component="h2" sx={{ maxWidth: 480, fontSize: { xs: '2rem', md: '2.5rem' }, fontWeight: 800, lineHeight: 1.05, letterSpacing: '-0.035em' }}>Six real-world .NET engineering</Typography>
         </Box>
-        <Typography color="text.secondary" sx={{ maxWidth: 300, pb: 0.35, fontSize: '0.875rem', lineHeight: 1.5 }}>Hands-on projects, not endless theory. Build real software from week one.</Typography>
+        <Typography color="text.secondary" sx={{ maxWidth: 300, pb: 0.35, fontSize: '0.875rem', lineHeight: 1.5 }}>Every module ends with a real working project you can ship.</Typography>
       </Box>
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))', md: 'repeat(3, minmax(0, 1fr))' }, gap: 1.5 }}>
         {pillars.map((pillar) => <Box component="article" key={pillar.title} sx={{ minWidth: 0, minHeight: { xs: 112, md: 110 }, p: { xs: 1.75, md: 2 }, border: 1, borderColor: 'divider', borderRadius: 1, backgroundColor: 'background.paper', transition: 'background-color 160ms ease, border-color 160ms ease', '&:hover': { borderColor: pillar.color, backgroundColor: (theme) => alpha(pillar.color, theme.palette.mode === 'dark' ? 0.16 : 0.06) } }}>
