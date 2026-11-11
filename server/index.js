@@ -5024,6 +5024,7 @@ const issueSetPasswordLink = async (transaction, userId) => {
 }
 
 const oneTimePasswordLifetimeMs = 7 * 24 * 60 * 60 * 1000
+const adminResetPasswordLifetimeMs = 24 * 60 * 60 * 1000
 const oneTimePasswordAlphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789'
 const generateOneTimePassword = () => Array.from({ length: 12 }, () => oneTimePasswordAlphabet[randomInt(oneTimePasswordAlphabet.length)]).join('')
 
@@ -6242,26 +6243,33 @@ app.post('/api/admin/users/:accountType/:id/reset-password', requireAdmin, async
   const id = parseTutorId(request.params.id)
   const accountType = request.params.accountType
   if (id === null || !['user', 'tutor'].includes(accountType)) return response.status(400).json({ message: 'Invalid account.' })
+  const temporaryPassword = generateOneTimePassword()
+  const passwordHash = await hashPassword(temporaryPassword)
+  const expiresAt = new Date(Date.now() + adminResetPasswordLifetimeMs)
   let userId
+  let email
   if (accountType === 'user') {
-    const [user] = await sql`UPDATE users SET must_reset_password = true WHERE id = ${id} RETURNING id`
+    const [user] = await sql`UPDATE users SET password_hash = ${passwordHash}, must_reset_password = true, one_time_password_expires_at = ${expiresAt} WHERE id = ${id} RETURNING id, email`
     if (!user) return response.status(404).json({ message: 'Account not found.' })
     userId = Number(user.id)
+    email = user.email
   } else {
     const [tutor] = await sql`SELECT name, email, status FROM tutors WHERE id = ${id}`
     if (!tutor) return response.status(404).json({ message: 'Account not found.' })
     const [user] = await sql`
-      INSERT INTO users ${sql({ name: tutor.name, email: tutor.email, password_hash: await hashPassword(randomBytes(32).toString('base64url')), role: 'tutor', status: tutor.status === 'Active' ? 'Active' : 'Suspended', must_reset_password: true })}
-      ON CONFLICT (email) DO UPDATE SET must_reset_password = true
-      RETURNING id
+      INSERT INTO users ${sql({ name: tutor.name, email: tutor.email, password_hash: passwordHash, role: 'tutor', status: tutor.status === 'Active' ? 'Active' : 'Suspended', must_reset_password: true, one_time_password_expires_at: expiresAt })}
+      ON CONFLICT (email) DO UPDATE SET password_hash = EXCLUDED.password_hash, must_reset_password = true, one_time_password_expires_at = EXCLUDED.one_time_password_expires_at
+      RETURNING id, email
     `
     userId = Number(user.id)
+    email = user.email
   }
   const [activeSessions] = await sql`SELECT COUNT(*)::INTEGER AS count FROM auth_sessions WHERE user_id = ${userId} AND ended_at IS NULL`
   await sql`UPDATE auth_sessions SET ended_at = NOW(), ended_reason = 'admin_password_reset_required' WHERE user_id = ${userId} AND ended_at IS NULL`
-  await writeAdminAudit(request, 'password_reset_required', userId, { activeSessions: activeSessions.count }, { mustResetPassword: true, activeSessions: 0 })
-  await createSecurityAlert(userId, 'password_reset_required', 'An administrator requires a password change before you can access your account.')
-  return response.status(204).end()
+  await writeAdminAudit(request, 'password_reset_required', userId, { activeSessions: activeSessions.count }, { mustResetPassword: true, activeSessions: 0, oneTimePasswordExpiresAt: expiresAt.toISOString() })
+  await createSecurityAlert(userId, 'password_reset_required', 'An administrator issued you a temporary password. Sign in and set a new password before it expires.')
+  response.set('Cache-Control', 'no-store')
+  return response.json({ email, temporaryPassword, oneTimePasswordExpiresAt: expiresAt.toISOString() })
 })
 
 app.post('/api/admin/courses', requireAdmin, async (request, response) => {

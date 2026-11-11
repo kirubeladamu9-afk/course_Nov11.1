@@ -1478,8 +1478,21 @@ const UsersPage: FC = () => {
     if (!account.accountType || account.accountId === undefined) return
     if (!window.confirm(`Reset the password for ${account.name}?`)) return
     try {
-      await resetAdminUserPassword(account.accountType, account.accountId)
-      toast.add({ title: 'Password reset required', description: `${account.name} must reset their password before signing in again.`, type: 'success', priority: 'high' })
+      const credentials = await resetAdminUserPassword(account.accountType, account.accountId)
+      const content = [
+        `Name: ${account.name}`,
+        `Email: ${credentials.email}`,
+        `Temporary password: ${credentials.temporaryPassword}`,
+        `Expires: ${new Date(credentials.oneTimePasswordExpiresAt).toLocaleString()}`,
+        'Sign in with this password, then choose a new one before it expires.',
+      ].join('\n')
+      const url = URL.createObjectURL(new Blob([content], { type: 'text/plain;charset=utf-8' }))
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `${account.name.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}-login-credentials.txt`
+      link.click()
+      URL.revokeObjectURL(url)
+      toast.add({ title: 'Password reset required', description: `${account.name} must sign in with the downloaded temporary password.`, type: 'success', priority: 'high' })
     } catch (error) {
       toast.add({ title: 'Unable to reset password', description: error instanceof Error ? error.message : 'Please try again.', type: 'error' })
     }

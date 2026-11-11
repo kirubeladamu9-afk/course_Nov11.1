@@ -1430,9 +1430,10 @@ export const updateAdminUserStatus = async (accountType: AdminUser['accountType'
   return response.json()
 }
 
-export const resetAdminUserPassword = async (accountType: AdminUser['accountType'], accountId: number): Promise<void> => {
+export const resetAdminUserPassword = async (accountType: AdminUser['accountType'], accountId: number): Promise<{ email: string; temporaryPassword: string; oneTimePasswordExpiresAt: string }> => {
   const response = await requestApi(`/api/admin/users/${accountType}/${accountId}/reset-password`, { method: 'POST' })
   if (!response.ok) throw new Error(await getErrorMessage(response))
+  return response.json()
 }
 
 export const updateAuthenticatedProfile = async (profile: { name: string; email: string; phone: string }): Promise<AuthUser> => {
