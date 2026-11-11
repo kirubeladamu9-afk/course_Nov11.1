@@ -50,7 +50,7 @@ const programs: ProgramDefinition[] = [
     description: 'Live, engaging online classes designed to build confidence and sharpen thinking with guided instruction and practice.',
     features: ['Ages 8–18', 'Live online instruction', 'Flexible scheduling after payment'],
     accent: '#127C71',
-    icon: <SchoolIcon sx={{ fontSize: 22 }} />,
+    icon: <SchoolIcon sx={{ fontSize: 72 }} />,
   },
   {
     id: 'summer-camp',
@@ -61,7 +61,7 @@ const programs: ProgramDefinition[] = [
     description: 'Make school breaks count with focused, social learning in small live cohorts.',
     features: ['Small live learning groups', 'Weekday camp schedules', 'Tutor-led practice and support'],
     accent: '#D0821C',
-    icon: <EventAvailableIcon sx={{ fontSize: 22 }} />,
+    icon: <EventAvailableIcon sx={{ fontSize: 72 }} />,
   },
   {
     id: 'ministry-exam-prep',
@@ -72,7 +72,7 @@ const programs: ProgramDefinition[] = [
     description: 'Structured revision and exam-focused support aligned to each learner’s grade level.',
     features: ['Grade-specific preparation', 'Linked course curriculum', 'Small-group exam support'],
     accent: '#127C71',
-    icon: <MenuBookIcon sx={{ fontSize: 22 }} />,
+    icon: <MenuBookIcon sx={{ fontSize: 72 }} />,
   },
 ]
 
@@ -230,13 +230,13 @@ const ProgramCard: FC<ProgramCardProps> = ({ program, classes, onEnroll }) => {
   const isBatchProgram = program.id !== 'international-online-interactive'
 
   return (
-    <Card elevation={0} sx={{ position: 'relative', height: '100%', overflow: 'hidden', border: 1, borderTop: 3, borderColor: 'divider', borderTopColor: program.accent, borderRadius: 3, backgroundColor: 'background.paper' }}>
-      <CardContent sx={{ height: '100%', display: 'flex', flexDirection: 'column', p: { xs: 2.5, md: 3 }, '&:last-child': { pb: { xs: 2.5, md: 3 } } }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={1} sx={{ mb: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 42, height: 42, borderRadius: '50%', color: '#fff', backgroundColor: program.accent, boxShadow: `0 6px 14px ${alpha(program.accent, 0.35)}` }}>{program.icon}</Box>
-          <Chip label={program.eyebrow} size="small" variant="outlined" sx={{ borderColor: 'divider', fontSize: 11 }} />
-        </Stack>
-        <Typography component="h3" variant="h5" sx={{ mb: 0.75 }}>{program.title}</Typography>
+    <Card elevation={0} sx={{ position: 'relative', height: '100%', overflow: 'hidden', p: 2, borderRadius: 4, backgroundColor: 'background.paper', transition: (theme) => theme.transitions.create(['box-shadow']), '&:hover': { boxShadow: 2 } }}>
+      <CardContent sx={{ height: '100%', display: 'flex', flexDirection: 'column', p: 0, '&:last-child': { pb: 0 } }}>
+        <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', height: 200, mb: 2, borderRadius: 3, overflow: 'hidden', color: program.accent, backgroundColor: alpha(program.accent, 0.12) }}>
+          {program.icon}
+          <Chip label={program.eyebrow} size="small" sx={{ position: 'absolute', top: 12, left: 12, backgroundColor: 'background.paper', fontSize: 11 }} />
+        </Box>
+        <Typography component="h3" variant="h4" sx={{ fontSize: '1.4rem', mb: 0.75 }}>{program.title}</Typography>
         <Stack direction="row" alignItems="baseline" spacing={0.5} sx={{ mb: 2 }}>
           <Typography variant="h6" color="primary.main" sx={{ fontWeight: 700 }}>{program.price}</Typography>
           <Typography color="text.secondary" variant="caption">{program.priceDetail}</Typography>
