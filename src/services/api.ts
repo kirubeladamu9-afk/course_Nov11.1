@@ -1433,7 +1433,6 @@ export const updateAdminUserStatus = async (accountType: AdminUser['accountType'
 export const resetAdminUserPassword = async (accountType: AdminUser['accountType'], accountId: number): Promise<void> => {
   const response = await requestApi(`/api/admin/users/${accountType}/${accountId}/reset-password`, { method: 'POST' })
   if (!response.ok) throw new Error(await getErrorMessage(response))
-  return response.json()
 }
 
 export const updateAuthenticatedProfile = async (profile: { name: string; email: string; phone: string }): Promise<AuthUser> => {
