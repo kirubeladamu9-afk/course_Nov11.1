@@ -7,7 +7,7 @@ import { Link as ScrollLink } from 'react-scroll'
 import { navigateTo } from '@/lib/navigation'
 import { navigations } from './navigation.data'
 
-const programPaths = new Set(['popular-course', 'training-programs', '/courses', '/practice-exams'])
+const programPaths = new Set(['popular-course', '/training-programs', '/courses', '/practice-exams'])
 
 interface Props {
   isAdmin?: boolean
@@ -120,7 +120,6 @@ const Navigation: FC<Props> = ({ isAdmin = false, onNavigate }) => {
           {programDestinations.map(({ path: destination, label }) => {
             const isRoute = destination.startsWith('/')
             const destinationHref = isRoute ? destination : `/#${destination}`
-            const displayLabel = destination === 'training-programs' ? 'Training Programs' : label
             return <MenuItem
               key={destination}
               component="a"
@@ -132,7 +131,7 @@ const Navigation: FC<Props> = ({ isAdmin = false, onNavigate }) => {
                   onNavigate?.()
                 }
               }}
-            >{displayLabel}</MenuItem>
+            >{label}</MenuItem>
           })}
         </Menu>
       </Box>

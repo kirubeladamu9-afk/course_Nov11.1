@@ -24,23 +24,25 @@ type MinistryGrade = (typeof ministryGrades)[number]
 
 type CheckoutCourse = Pick<Course, 'id' | 'title' | 'price'> & { id: number }
 
-interface ProgramDefinition {
+export interface ProgramDefinition {
   id: ProgramId
   eyebrow: string
   title: string
   price: string
+  startingPrice: number
   priceDetail: string
   description: string
   features: string[]
   image: string
 }
 
-const programs: ProgramDefinition[] = [
+export const programs: ProgramDefinition[] = [
   {
     id: 'international-online-interactive',
     eyebrow: 'Flexible start',
     title: 'International Online Interactive',
     price: '$120',
+    startingPrice: 120,
     priceDetail: '/ package',
     description: 'Live, engaging online classes designed to build confidence and sharpen thinking with guided instruction and practice.',
     features: ['Ages 8–18', 'Live online instruction', 'Flexible scheduling after payment'],
@@ -51,6 +53,7 @@ const programs: ProgramDefinition[] = [
     eyebrow: 'Live cohorts',
     title: 'Summer Camp Packages',
     price: 'From $180',
+    startingPrice: 180,
     priceDetail: '/ package',
     description: 'Make school breaks count with focused, social learning in small live cohorts.',
     features: ['Small live learning groups', 'Weekday camp schedules', 'Tutor-led practice and support'],
@@ -61,6 +64,7 @@ const programs: ProgramDefinition[] = [
     eyebrow: 'Exam focused',
     title: 'Ministry Exam Prep',
     price: 'From $220',
+    startingPrice: 220,
     priceDetail: '/ package',
     description: 'Structured revision and exam-focused support aligned to each learner’s grade level.',
     features: ['Grade-specific preparation', 'Linked course curriculum', 'Small-group exam support'],
@@ -75,7 +79,7 @@ const formatTime = (time: string) => {
   return `${hour % 12 || 12}:${String(minute).padStart(2, '0')} ${hour >= 12 ? 'PM' : 'AM'}`
 }
 
-const formatSchedule = (schedule?: Partial<PublicClass['schedule']> | null) => {
+export const formatSchedule = (schedule?: Partial<PublicClass['schedule']> | null) => {
   if (!schedule) return 'Schedule to be confirmed'
   if (schedule.flexible) return 'Flexible schedule'
   const days = Array.isArray(schedule.days) ? schedule.days : []
@@ -92,7 +96,7 @@ const findCourse = (courses: Course[], classRecord?: PublicClass, preferInternat
   return { id: candidate.id, title: candidate.title, price: candidate.price }
 }
 
-const AvailabilityBadge: FC<{ classRecord: PublicClass }> = ({ classRecord }) => (
+export const AvailabilityBadge: FC<{ classRecord: PublicClass }> = ({ classRecord }) => (
   <Chip
     size="small"
     label={classRecord.enrollmentClosed ? 'Enrollment closed' : classRecord.status === 'full' ? 'Full · Join waitlist' : `${classRecord.enrolledCount}/${classRecord.capacity} spots`}
@@ -216,7 +220,7 @@ interface ProgramCardProps {
   onEnroll: (classRecord?: PublicClass, preferInternational?: boolean) => void
 }
 
-const ProgramCard: FC<ProgramCardProps> = ({ program, classes, onEnroll }) => {
+export const ProgramCard: FC<ProgramCardProps> = ({ program, classes, onEnroll }) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [grade, setGrade] = useState<MinistryGrade>(6)
   const isBatchProgram = program.id !== 'international-online-interactive'

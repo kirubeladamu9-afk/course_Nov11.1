@@ -9,7 +9,7 @@ import type { FC } from 'react'
 const companyMenu: Navigation[] = [
   { label: 'About Us', path: '/about-us' },
   { label: 'Coursesharp', path: '/' },
-  { label: 'Programs', path: '/#training-programs' },
+  { label: 'Training Programs', path: '/training-programs' },
   { label: 'Practice Exams', path: '/practice-exams' },
 ]
 
@@ -22,7 +22,7 @@ const supportMenu: Navigation[] = [
 
 const linkMenu: Navigation[] = [
   { label: 'Courses', path: '/#popular-course' },
-  { label: 'Programs', path: '/#training-programs' },
+  { label: 'Training Programs', path: '/training-programs' },
   { label: 'Practice Exams', path: '/practice-exams' },
   { label: 'Become a Tutor', path: '/tutor' },
 ]
