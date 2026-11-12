@@ -24,7 +24,6 @@ import { type FC, useEffect, useMemo, useState } from 'react'
 import { Footer } from '@/components/footer'
 import { Header } from '@/components/header'
 import EnrollmentModal from '@/components/course/enrollment-modal'
-import { toast } from '@/components/toast'
 import { type Course } from '@/interfaces/course'
 import { getPublicClasses, type PublicClass } from '@/services/api'
 import { AvailabilityBadge, formatSchedule, programs, type ProgramDefinition } from './training-programs'
@@ -38,43 +37,38 @@ interface TrainingProgramsPageProps {
 type SortOrder = 'recommended' | 'price-low' | 'price-high' | 'title'
 type CheckoutCourse = Pick<Course, 'id' | 'title' | 'price'> & { id: number }
 
-interface ProgramListing {
-  key: string
+interface ClassListing {
   program: ProgramDefinition
-  classRecord?: PublicClass
-  price: number
+  classRecord: PublicClass
+  description: string
 }
 
-interface ProgramListingCardProps {
-  listing: ProgramListing
-  onEnroll: (classRecord?: PublicClass, preferInternational?: boolean) => void
+interface ProgramClassCardProps {
+  listing: ClassListing
+  onEnroll: (classRecord: PublicClass) => void
 }
 
-const ProgramListingCard: FC<ProgramListingCardProps> = ({ listing: { program, classRecord }, onEnroll }) => {
-  const isInternational = program.id === 'international-online-interactive'
-  const canEnroll = isInternational || Boolean(classRecord && !classRecord.enrollmentClosed && (classRecord.status === 'open' || classRecord.status === 'full'))
-  const title = classRecord?.title ?? program.title
-  const actionLabel = classRecord ? `${classRecord.status === 'full' ? 'Join waitlist for' : 'Join'} ${classRecord.title}` : `Enroll in ${program.title}`
+const ProgramClassCard: FC<ProgramClassCardProps> = ({ listing: { classRecord, description }, onEnroll }) => {
+  const canEnroll = !classRecord.enrollmentClosed && (classRecord.status === 'open' || classRecord.status === 'full')
+  const actionLabel = `${classRecord.status === 'full' ? 'Join waitlist for' : 'Join'} ${classRecord.title}`
 
   return <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', p: 2, backgroundColor: 'background.paper', borderRadius: 4, position: 'relative', transition: (theme) => theme.transitions.create(['box-shadow']), '&:hover': { boxShadow: 2, [`& .${iconButtonClasses.root}`]: { backgroundColor: 'primary.main', color: 'primary.contrastText', boxShadow: 2 } } }}>
     <Box sx={{ position: 'relative', lineHeight: 0, overflow: 'hidden', aspectRatio: '16 / 9', borderRadius: 3, mb: 2, '& .program-cover-image': { display: 'block', width: '100%', height: '100%', objectFit: 'cover', borderRadius: 3 } }}>
-      <img className="program-cover-image" src={classRecord?.cover ?? program.image} width={760} height={428} alt={title} loading="lazy" />
+      <img className="program-cover-image" src={classRecord.cover ?? '/images/training-programs/international-online-interactive.webp'} width={760} height={428} alt={classRecord.title} loading="lazy" />
     </Box>
-    <Typography component="h2" variant="h5" sx={{ mb: 1.5, height: 56, overflow: 'hidden', fontSize: '1.2rem' }}>{title}</Typography>
-    <Box sx={{ mb: 2 }}>
-      {classRecord ? <Stack spacing={0.5}>
-        <Typography variant="body2" sx={{ fontWeight: 600 }}>{program.title}</Typography>
-        <Typography variant="body2" color="text.secondary">{formatSchedule(classRecord.schedule)}</Typography>
-        <Typography variant="body2" color="text.secondary">Tutor: {classRecord.tutorName}</Typography>
-        <Box sx={{ pt: 0.5 }}><AvailabilityBadge classRecord={classRecord} /></Box>
-      </Stack> : <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{program.description}</Typography>}
-    </Box>
+    <Typography component="h4" variant="h5" sx={{ mb: 1, height: 56, overflow: 'hidden', fontSize: '1.2rem' }}>{classRecord.title}</Typography>
+    <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5, lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{description}</Typography>
+    <Stack spacing={0.5} sx={{ mb: 2 }}>
+      <Typography variant="body2" color="text.secondary">{formatSchedule(classRecord.schedule)}</Typography>
+      <Typography variant="body2" color="text.secondary">Tutor: {classRecord.tutorName}</Typography>
+      <Box sx={{ pt: 0.5 }}><AvailabilityBadge classRecord={classRecord} /></Box>
+    </Stack>
     <Box sx={{ mt: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
       <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5 }}>
-        <Typography variant="h5" color="primary.main">{classRecord ? `$${classRecord.price}` : program.price}</Typography>
-        <Typography variant="h6">{classRecord ? '/ batch' : program.priceDetail}</Typography>
+        <Typography variant="h5" color="primary.main">{`$${classRecord.price}`}</Typography>
+        <Typography variant="h6">/ class</Typography>
       </Box>
-      <IconButton color="primary" aria-label={canEnroll ? actionLabel : `No open batches for ${program.title}`} disabled={!canEnroll} onClick={() => onEnroll(classRecord, isInternational)} sx={{ '&:hover': { color: 'primary.dark' } }}>
+      <IconButton color="primary" aria-label={canEnroll ? actionLabel : `${classRecord.title} is not open for enrollment`} disabled={!canEnroll} onClick={() => onEnroll(classRecord)} sx={{ '&:hover': { color: 'primary.dark' } }}>
         <ArrowForwardIcon />
       </IconButton>
     </Box>
@@ -91,14 +85,13 @@ const TrainingProgramsPage: FC<TrainingProgramsPageProps> = ({ courses, darkMode
   const [enrollmentClassId, setEnrollmentClassId] = useState<number | null>(null)
 
   const programTypes = useMemo(() => Array.from(new Set(programs.map((program) => program.eyebrow))), [])
-  const listings = useMemo<ProgramListing[]>(() => programs.flatMap((program): ProgramListing[] => {
-    const classes = program.id === 'international-online-interactive'
-      ? []
-      : liveClasses.filter((classRecord) => classRecord.programId === program.id && classRecord.published && classRecord.status !== 'closed')
-    if (!classes.length) return [{ key: program.id, program, price: program.startingPrice }]
-    return classes.map((classRecord) => ({ key: `${program.id}-${classRecord.id}`, program, classRecord, price: classRecord.price }))
-  }), [liveClasses])
-  const priceMaximum = Math.max(50, Math.ceil(Math.max(0, ...listings.map((listing) => listing.price)) / 50) * 50)
+  const listings = useMemo<ClassListing[]>(() => liveClasses.flatMap((classRecord) => {
+    const program = programs.find((candidate) => candidate.id === classRecord.programId)
+    if (!program || !classRecord.published || classRecord.status === 'closed') return []
+    const course = courses.find((candidate) => Number(candidate.id) === classRecord.courseId)
+    return [{ program, classRecord, description: course?.description ?? program.description }]
+  }), [courses, liveClasses])
+  const priceMaximum = Math.max(50, Math.ceil(Math.max(0, ...listings.map((listing) => listing.classRecord.price)) / 50) * 50)
   const activePriceRange = priceRange ?? [0, priceMaximum]
   const hasFilters = selectedTypes.length > 0 || activePriceRange[0] > 0 || activePriceRange[1] < priceMaximum
 
@@ -118,15 +111,19 @@ const TrainingProgramsPage: FC<TrainingProgramsPageProps> = ({ courses, darkMode
     const query = search.trim().toLocaleLowerCase()
     return listings
       .filter(({ program }) => selectedTypes.length === 0 || selectedTypes.includes(program.eyebrow))
-      .filter(({ price }) => price >= activePriceRange[0] && price <= activePriceRange[1])
-      .filter(({ program, classRecord }) => !query || `${program.title} ${program.description} ${program.eyebrow} ${program.features.join(' ')} ${classRecord?.title ?? ''} ${classRecord?.tutorName ?? ''}`.toLocaleLowerCase().includes(query))
+      .filter(({ classRecord }) => classRecord.price >= activePriceRange[0] && classRecord.price <= activePriceRange[1])
+      .filter(({ program, classRecord, description }) => !query || `${program.title} ${program.eyebrow} ${program.features.join(' ')} ${classRecord.title} ${classRecord.tutorName} ${description}`.toLocaleLowerCase().includes(query))
       .sort((a, b) => {
-        if (sortOrder === 'price-low') return a.price - b.price
-        if (sortOrder === 'price-high') return b.price - a.price
-        if (sortOrder === 'title') return (a.classRecord?.title ?? a.program.title).localeCompare(b.classRecord?.title ?? b.program.title)
+        if (sortOrder === 'price-low') return a.classRecord.price - b.classRecord.price
+        if (sortOrder === 'price-high') return b.classRecord.price - a.classRecord.price
+        if (sortOrder === 'title') return a.classRecord.title.localeCompare(b.classRecord.title)
         return 0
       })
   }, [activePriceRange, listings, search, selectedTypes, sortOrder])
+
+  const categoryGroups = programs
+    .filter((program) => selectedTypes.length === 0 || selectedTypes.includes(program.eyebrow))
+    .map((program) => ({ program, items: visibleListings.filter((listing) => listing.program.id === program.id) }))
 
   const clearFilters = () => {
     setSearch('')
@@ -134,16 +131,9 @@ const TrainingProgramsPage: FC<TrainingProgramsPageProps> = ({ courses, darkMode
     setPriceRange(null)
   }
 
-  const handleEnroll = (classRecord?: PublicClass, preferInternational = false) => {
-    const course = classRecord
-      ? { id: classRecord.courseId ?? classRecord.id, title: classRecord.title, price: classRecord.price }
-      : preferInternational ? courses.find((candidate) => candidate.category.toLowerCase().includes('international') || candidate.title.toLowerCase().includes('interactive')) : undefined
-    if (!course || typeof course.id !== 'number') {
-      toast.add({ title: 'Enrollment is not ready', description: 'Create a published International Online Interactive course before checkout can begin.', type: 'error' })
-      return
-    }
-    setEnrollmentCourse({ id: course.id, title: course.title, price: course.price })
-    setEnrollmentClassId(classRecord?.id ?? null)
+  const handleEnroll = (classRecord: PublicClass) => {
+    setEnrollmentCourse({ id: classRecord.courseId ?? classRecord.id, title: classRecord.title, price: classRecord.price })
+    setEnrollmentClassId(classRecord.id)
   }
 
   return <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
@@ -179,7 +169,7 @@ const TrainingProgramsPage: FC<TrainingProgramsPageProps> = ({ courses, darkMode
               <MenuItem value="recommended">Recommended</MenuItem>
               <MenuItem value="price-low">Price: low to high</MenuItem>
               <MenuItem value="price-high">Price: high to low</MenuItem>
-              <MenuItem value="title">Program name</MenuItem>
+              <MenuItem value="title">Class name</MenuItem>
             </Select>
           </FormControl>
         </Stack>
@@ -202,26 +192,28 @@ const TrainingProgramsPage: FC<TrainingProgramsPageProps> = ({ courses, darkMode
               <Box sx={{ py: 2 }}>
                 <Typography variant="subtitle2" sx={{ mb: 0.5, fontWeight: 700 }}>Price range</Typography>
                 <Typography variant="caption" color="text.secondary">${activePriceRange[0]} – ${activePriceRange[1]}</Typography>
-                <Slider getAriaLabel={(index) => (index === 0 ? 'Minimum program price' : 'Maximum program price')} value={activePriceRange} min={0} max={priceMaximum} step={1} onChange={(_, value) => { if (Array.isArray(value)) setPriceRange([value[0], value[1]]) }} valueLabelDisplay="auto" valueLabelFormat={(value) => `$${value}`} sx={{ mt: 1, mb: 0.5, color: 'primary.main' }} />
+                <Slider getAriaLabel={(index) => (index === 0 ? 'Minimum class price' : 'Maximum class price')} value={activePriceRange} min={0} max={priceMaximum} step={1} onChange={(_, value) => { if (Array.isArray(value)) setPriceRange([value[0], value[1]]) }} valueLabelDisplay="auto" valueLabelFormat={(value) => `$${value}`} sx={{ mt: 1, mb: 0.5, color: 'primary.main' }} />
                 <Stack direction="row" justifyContent="space-between"><Typography variant="caption" color="text.secondary">Min</Typography><Typography variant="caption" color="text.secondary">Max</Typography></Stack>
               </Box>
             </Paper>
           </Grid>
           <Grid item xs={12} md={9}>
-            {visibleListings.length ? <>
-              <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
-                <Typography variant="body2" color="text.secondary">Showing <Box component="span" sx={{ color: 'text.primary', fontWeight: 700 }}>{visibleListings.length}</Box> {visibleListings.length === 1 ? 'program' : 'programs'}</Typography>
-                {(hasFilters || search) && <Button size="small" onClick={clearFilters}>Clear filters</Button>}
-              </Stack>
-              <Grid container spacing={2} alignItems="stretch">
-                {visibleListings.map((listing) => <Grid item xs={12} sm={6} md={4} key={listing.key}><ProgramListingCard listing={listing} onEnroll={handleEnroll} /></Grid>)}
-              </Grid>
-            </> : <Paper variant="outlined" sx={{ p: { xs: 4, md: 6 }, textAlign: 'center', borderRadius: 3, backgroundColor: 'background.paper' }}>
-              <SearchRoundedIcon color="disabled" sx={{ fontSize: 38 }} />
-              <Typography variant="h6" sx={{ mt: 1, fontWeight: 700 }}>No programs match your filters</Typography>
-              <Typography color="text.secondary" sx={{ mt: 0.5, mb: 2 }}>Try another keyword or adjust your filters to see more programs.</Typography>
-              <Button variant="outlined" onClick={clearFilters}>Show all programs</Button>
-            </Paper>}
+            <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2.5 }}>
+              <Typography variant="body2" color="text.secondary">Showing <Box component="span" sx={{ color: 'text.primary', fontWeight: 700 }}>{visibleListings.length}</Box> {visibleListings.length === 1 ? 'class' : 'classes'}</Typography>
+              {(hasFilters || search) && <Button size="small" onClick={clearFilters}>Clear filters</Button>}
+            </Stack>
+            {categoryGroups.map(({ program, items }) => <Box key={program.id} component="section" aria-labelledby={`program-${program.id}`} sx={{ mb: 6 }}>
+              <Box sx={{ mb: 2.5 }}>
+                <Typography variant="overline" color="primary.main" sx={{ fontWeight: 800, letterSpacing: 1.25 }}>{program.eyebrow}</Typography>
+                <Typography component="h3" id={`program-${program.id}`} variant="h5" sx={{ fontWeight: 800, letterSpacing: '-.02em' }}>{program.title}</Typography>
+                <Typography color="text.secondary" sx={{ mt: 0.5, maxWidth: 680 }}>{program.description}</Typography>
+              </Box>
+              {items.length ? <Grid container spacing={2} alignItems="stretch">
+                {items.map((listing) => <Grid item xs={12} sm={6} md={4} key={listing.classRecord.id}><ProgramClassCard listing={listing} onEnroll={handleEnroll} /></Grid>)}
+              </Grid> : <Paper variant="outlined" sx={{ p: 3, textAlign: 'center', borderRadius: 3, backgroundColor: 'background.paper' }}>
+                <Typography color="text.secondary">{hasFilters || search ? 'No classes in this program match your filters.' : 'No published classes yet. Check back soon.'}</Typography>
+              </Paper>}
+            </Box>)}
           </Grid>
         </Grid>
       </Container>
