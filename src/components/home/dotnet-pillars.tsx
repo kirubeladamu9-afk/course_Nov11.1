@@ -1,7 +1,6 @@
 import Box from '@mui/material/Box'
 import Container from '@mui/material/Container'
 import Typography from '@mui/material/Typography'
-import { alpha } from '@mui/material/styles'
 import { type FC } from 'react'
 import VideocamOutlinedIcon from '@mui/icons-material/VideocamOutlined'
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined'
@@ -68,7 +67,7 @@ const DotNetPillars: FC = () => (
         <Typography color="text.secondary" sx={{ maxWidth: 360, pb: 0.75, fontSize: '1.05rem', lineHeight: 1.6 }}>Courses, live classes, and tools built around each learner’s progress.</Typography>
       </Box>
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))', md: 'repeat(3, minmax(0, 1fr))' }, gap: 2.5 }}>
-        {pillars.map((pillar) => <Box component="article" key={pillar.title} sx={{ minWidth: 0, minHeight: { xs: 180, md: 210 }, p: { xs: 2.5, md: 3 }, border: 1, borderColor: 'divider', borderRadius: 2, backgroundColor: 'background.paper', transition: 'background-color 160ms ease, border-color 160ms ease', '&:hover': { borderColor: pillar.color, backgroundColor: (theme) => alpha(pillar.color, theme.palette.mode === 'dark' ? 0.16 : 0.06) } }}>
+        {pillars.map((pillar) => <Box component="article" key={pillar.title} sx={{ minWidth: 0, minHeight: { xs: 180, md: 210 }, p: { xs: 2.5, md: 3 }, border: 1, borderColor: 'divider', borderRadius: 2, backgroundColor: 'background.paper', transition: 'background-color 160ms ease, border-color 160ms ease', '&:hover': { borderColor: pillar.color, backgroundColor: 'rgb(244 244 245 / 1)', '& h3': { textDecoration: 'underline', textUnderlineOffset: '4px', textDecorationColor: pillar.color } } }}>
           <Box sx={{ display: 'grid', placeItems: 'center', width: 44, height: 44, mb: 2.5, border: 1, borderColor: 'divider', borderRadius: 1, color: pillar.color, backgroundColor: pillar.background, '& svg': { fontSize: 24 } }}>{pillar.icon}</Box>
           <Typography component="h3" sx={{ mb: 1, fontSize: '1.25rem', fontWeight: 750, lineHeight: 1.3 }}>{pillar.title}</Typography>
           <Typography color="text.secondary" sx={{ fontSize: '0.95rem', lineHeight: 1.6 }}>{pillar.description}</Typography>
