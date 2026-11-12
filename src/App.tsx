@@ -220,7 +220,7 @@ const App: React.FC<AppProps> = ({ darkMode, onToggleDarkMode }) => {
         ) : (
           <>
             <HomeHero />
-            <HomeDotNetPillars />
+            <HomeDotNetPillars courses={homeCourses ?? []} />
             <HomePopularCourse courses={homeCourses ?? []} />
             <HomeTrainingPrograms courses={homeCourses ?? []} />
             <HomeFeature />
