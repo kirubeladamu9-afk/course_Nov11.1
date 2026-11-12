@@ -78,12 +78,12 @@ const ExpItem: FC<ExpItemProps> = ({ item }) => {
   return (
     <Box ref={ref} sx={{ textAlign: 'center', mb: { xs: 1, md: 0 } }}>
       <Typography
-        sx={{ color: 'secondary.main', mb: { xs: 1, md: 2 }, fontSize: { xs: 34, md: 44 }, fontWeight: 'bold', fontVariantNumeric: 'tabular-nums' }}
+        sx={{ color: 'secondary.main', mb: { xs: 1, md: 1.5 }, fontSize: { xs: 36, md: 48 }, fontWeight: 'bold', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}
       >
         {count}
         {suffix}
       </Typography>
-      <Typography color="text.secondary" variant="h5">
+      <Typography color="text.secondary" sx={{ fontSize: { xs: 16, md: 18 }, fontWeight: 600 }}>
         {label}
       </Typography>
     </Box>
@@ -256,7 +256,7 @@ const HomeHero: FC = () => {
         </Grid>
 
         {/* Experience */}
-        <Box sx={{ py: 4, px: 7, borderRadius: 3, backgroundColor: 'background.paper' }}>
+        <Box sx={{ py: { xs: 3, md: 4 }, px: { xs: 3, md: 5 }, borderRadius: 3, backgroundColor: 'background.paper', boxShadow: '0 6px 14px 0 rgba(15, 23, 42, 0.08)' }}>
           <Grid container spacing={2}>
             {exps.map((item) => (
               <Grid key={item.label} item xs={12} md={4}>
