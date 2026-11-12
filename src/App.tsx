@@ -6,6 +6,7 @@ import Typography from '@mui/material/Typography'
 import { Footer } from '@/components/footer'
 import { Header } from '@/components/header'
 import { SpinnerCustom } from '@/components/spinner'
+import Reveal from '@/components/motion/reveal'
 import SignInPage from '@/components/auth/sign-in-page'
 import SetPasswordPage from '@/components/auth/set-password-page'
 import { navigateTo } from '@/lib/navigation'
@@ -220,12 +221,12 @@ const App: React.FC<AppProps> = ({ darkMode, onToggleDarkMode }) => {
         ) : (
           <>
             <HomeHero />
-            <HomeDotNetPillars />
-            <HomePopularCourse courses={homeCourses ?? []} />
-            <HomeTrainingPrograms courses={homeCourses ?? []} />
-            <HomeFeature />
-            <HomeTestimonial />
-            <HomeOurMentors />
+            <Reveal><HomeDotNetPillars /></Reveal>
+            <Reveal><HomePopularCourse courses={homeCourses ?? []} /></Reveal>
+            <Reveal><HomeTrainingPrograms courses={homeCourses ?? []} /></Reveal>
+            <Reveal><HomeFeature /></Reveal>
+            <Reveal><HomeTestimonial /></Reveal>
+            <Reveal><HomeOurMentors /></Reveal>
             <HomeNewsLetter />
             <Footer />
           </>
