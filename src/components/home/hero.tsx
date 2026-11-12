@@ -1,4 +1,4 @@
-import React, { FC } from 'react'
+import React, { FC, useEffect, useRef, useState } from 'react'
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import Container from '@mui/material/Container'
@@ -9,35 +9,79 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 
 interface Exp {
   label: string
-  value: string
+  value: number
+  from: number
+  suffix: string
 }
 interface ExpItemProps {
   item: Exp
 }
 
+const COUNTDOWN_DURATION = 1600
+
 const exps: Array<Exp> = [
   {
     label: 'Students',
-    value: '500+',
+    value: 10,
+    from: 15,
+    suffix: 'K+',
   },
   {
     label: 'Quality Course',
-    value: '20+',
+    value: 20,
+    from: 25,
+    suffix: '+',
   },
   {
     label: 'Experience Mentors',
-    value: '10+',
+    value: 10,
+    from: 15,
+    suffix: '+',
   },
 ]
 
 const ExpItem: FC<ExpItemProps> = ({ item }) => {
-  const { value, label } = item
+  const { value, from, suffix, label } = item
+  const ref = useRef<HTMLDivElement>(null)
+  const [count, setCount] = useState(from)
+
+  useEffect(() => {
+    const node = ref.current
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (!node || typeof IntersectionObserver === 'undefined' || reduceMotion) {
+      setCount(value)
+      return
+    }
+    let frame = 0
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return
+        observer.disconnect()
+        const start = performance.now()
+        const tick = (now: number) => {
+          const progress = Math.min((now - start) / COUNTDOWN_DURATION, 1)
+          const eased = 1 - Math.pow(1 - progress, 3)
+          setCount(Math.round(from - (from - value) * eased))
+          if (progress < 1) frame = requestAnimationFrame(tick)
+        }
+        frame = requestAnimationFrame(tick)
+      },
+      { threshold: 0.4 },
+    )
+    observer.observe(node)
+    return () => {
+      observer.disconnect()
+      cancelAnimationFrame(frame)
+    }
+  }, [from, value])
+
   return (
-    <Box sx={{ textAlign: 'center', mb: { xs: 1, md: 0 } }}>
+    <Box ref={ref} sx={{ textAlign: 'center', mb: { xs: 1, md: 0 } }}>
       <Typography
-        sx={{ color: 'secondary.main', mb: { xs: 1, md: 2 }, fontSize: { xs: 34, md: 44 }, fontWeight: 'bold' }}
+        sx={{ color: 'secondary.main', mb: { xs: 1, md: 2 }, fontSize: { xs: 34, md: 44 }, fontWeight: 'bold', fontVariantNumeric: 'tabular-nums' }}
       >
-        {value}
+        {count}
+        {suffix}
       </Typography>
       <Typography color="text.secondary" variant="h5">
         {label}
@@ -214,10 +258,10 @@ const HomeHero: FC = () => {
         </Grid>
 
         {/* Experience */}
-        <Box sx={{ py: 4, px: 7, borderRadius: 4 }}>
+        <Box sx={{ py: 4, px: 7, borderRadius: 3, backgroundColor: 'background.paper', boxShadow: '0 10px 30px rgba(15, 23, 42, 0.08)' }}>
           <Grid container spacing={2}>
             {exps.map((item) => (
-              <Grid key={item.value} item xs={12} md={4}>
+              <Grid key={item.label} item xs={12} md={4}>
                 <ExpItem item={item} />
               </Grid>
             ))}
