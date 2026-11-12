@@ -256,7 +256,7 @@ const HomeHero: FC = () => {
         </Grid>
 
         {/* Experience */}
-        <Box sx={{ py: 4, px: 7, borderRadius: 3, backgroundColor: 'background.paper', boxShadow: '0 10px 30px rgba(15, 23, 42, 0.08)' }}>
+        <Box sx={{ py: 4, px: 7, borderRadius: 3, backgroundColor: 'background.paper' }}>
           <Grid container spacing={2}>
             {exps.map((item) => (
               <Grid key={item.label} item xs={12} md={4}>
