@@ -3,13 +3,10 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
-import Checkbox from '@mui/material/Checkbox'
 import Chip from '@mui/material/Chip'
 import Container from '@mui/material/Container'
 import Divider from '@mui/material/Divider'
 import FormControl from '@mui/material/FormControl'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import FormGroup from '@mui/material/FormGroup'
 import Grid from '@mui/material/Grid'
 import IconButton, { iconButtonClasses } from '@mui/material/IconButton'
 import InputAdornment from '@mui/material/InputAdornment'
@@ -77,14 +74,12 @@ const ProgramClassCard: FC<ProgramClassCardProps> = ({ listing: { classRecord, d
 
 const TrainingProgramsPage: FC<TrainingProgramsPageProps> = ({ courses, darkMode, onToggleDarkMode }) => {
   const [search, setSearch] = useState('')
-  const [selectedTypes, setSelectedTypes] = useState<string[]>([])
   const [priceRange, setPriceRange] = useState<[number, number] | null>(null)
   const [sortOrder, setSortOrder] = useState<SortOrder>('recommended')
   const [liveClasses, setLiveClasses] = useState<PublicClass[]>([])
   const [enrollmentCourse, setEnrollmentCourse] = useState<CheckoutCourse | null>(null)
   const [enrollmentClassId, setEnrollmentClassId] = useState<number | null>(null)
 
-  const programTypes = useMemo(() => Array.from(new Set(programs.map((program) => program.eyebrow))), [])
   const listings = useMemo<ClassListing[]>(() => liveClasses.flatMap((classRecord) => {
     const program = programs.find((candidate) => candidate.id === classRecord.programId)
     if (!program || !classRecord.published || classRecord.status === 'closed') return []
@@ -93,7 +88,7 @@ const TrainingProgramsPage: FC<TrainingProgramsPageProps> = ({ courses, darkMode
   }), [courses, liveClasses])
   const priceMaximum = Math.max(50, Math.ceil(Math.max(0, ...listings.map((listing) => listing.classRecord.price)) / 50) * 50)
   const activePriceRange = priceRange ?? [0, priceMaximum]
-  const hasFilters = selectedTypes.length > 0 || activePriceRange[0] > 0 || activePriceRange[1] < priceMaximum
+  const hasFilters = activePriceRange[0] > 0 || activePriceRange[1] < priceMaximum
 
   useEffect(() => {
     let isCurrent = true
@@ -110,7 +105,6 @@ const TrainingProgramsPage: FC<TrainingProgramsPageProps> = ({ courses, darkMode
   const visibleListings = useMemo(() => {
     const query = search.trim().toLocaleLowerCase()
     return listings
-      .filter(({ program }) => selectedTypes.length === 0 || selectedTypes.includes(program.eyebrow))
       .filter(({ classRecord }) => classRecord.price >= activePriceRange[0] && classRecord.price <= activePriceRange[1])
       .filter(({ program, classRecord, description }) => !query || `${program.title} ${program.eyebrow} ${program.features.join(' ')} ${classRecord.title} ${classRecord.tutorName} ${description}`.toLocaleLowerCase().includes(query))
       .sort((a, b) => {
@@ -119,15 +113,10 @@ const TrainingProgramsPage: FC<TrainingProgramsPageProps> = ({ courses, darkMode
         if (sortOrder === 'title') return a.classRecord.title.localeCompare(b.classRecord.title)
         return 0
       })
-  }, [activePriceRange, listings, search, selectedTypes, sortOrder])
-
-  const categoryGroups = programs
-    .filter((program) => selectedTypes.length === 0 || selectedTypes.includes(program.eyebrow))
-    .map((program) => ({ program, items: visibleListings.filter((listing) => listing.program.id === program.id) }))
+  }, [activePriceRange, listings, search, sortOrder])
 
   const clearFilters = () => {
     setSearch('')
-    setSelectedTypes([])
     setPriceRange(null)
   }
 
@@ -159,7 +148,7 @@ const TrainingProgramsPage: FC<TrainingProgramsPageProps> = ({ courses, darkMode
         <Box sx={{ mb: 3.5 }}>
           <Typography variant="overline" color="primary.main" sx={{ fontWeight: 800, letterSpacing: 1.25 }}>Browse and discover</Typography>
           <Typography component="h2" variant="h4" sx={{ mt: 0.25, fontWeight: 800, letterSpacing: '-.035em' }}>Explore all programs</Typography>
-          <Typography color="text.secondary" sx={{ mt: 0.75 }}>Search the programs or filter by type and price to find your next step.</Typography>
+          <Typography color="text.secondary" sx={{ mt: 0.75 }}>Search the programs or filter by price to find your next step.</Typography>
         </Box>
 
         <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5} sx={{ mb: 2.5 }}>
@@ -183,13 +172,6 @@ const TrainingProgramsPage: FC<TrainingProgramsPageProps> = ({ courses, darkMode
               </Stack>
               <Divider />
               <Box sx={{ py: 2 }}>
-                <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 700 }}>Program type</Typography>
-                <FormGroup>
-                  {programTypes.map((type) => <FormControlLabel key={type} control={<Checkbox size="small" checked={selectedTypes.includes(type)} onChange={(event) => setSelectedTypes((current) => event.target.checked ? [...current, type] : current.filter((value) => value !== type))} />} label={<Typography variant="body2">{type} <Typography component="span" variant="caption" color="text.secondary">({programs.filter((program) => program.eyebrow === type).length})</Typography></Typography>} sx={{ ml: 0, mr: 0, minHeight: 34 }} />)}
-                </FormGroup>
-              </Box>
-              <Divider />
-              <Box sx={{ py: 2 }}>
                 <Typography variant="subtitle2" sx={{ mb: 0.5, fontWeight: 700 }}>Price range</Typography>
                 <Typography variant="caption" color="text.secondary">${activePriceRange[0]} – ${activePriceRange[1]}</Typography>
                 <Slider getAriaLabel={(index) => (index === 0 ? 'Minimum class price' : 'Maximum class price')} value={activePriceRange} min={0} max={priceMaximum} step={1} onChange={(_, value) => { if (Array.isArray(value)) setPriceRange([value[0], value[1]]) }} valueLabelDisplay="auto" valueLabelFormat={(value) => `$${value}`} sx={{ mt: 1, mb: 0.5, color: 'primary.main' }} />
@@ -202,18 +184,11 @@ const TrainingProgramsPage: FC<TrainingProgramsPageProps> = ({ courses, darkMode
               <Typography variant="body2" color="text.secondary">Showing <Box component="span" sx={{ color: 'text.primary', fontWeight: 700 }}>{visibleListings.length}</Box> {visibleListings.length === 1 ? 'class' : 'classes'}</Typography>
               {(hasFilters || search) && <Button size="small" onClick={clearFilters}>Clear filters</Button>}
             </Stack>
-            {categoryGroups.map(({ program, items }) => <Box key={program.id} component="section" aria-labelledby={`program-${program.id}`} sx={{ mb: 6 }}>
-              <Box sx={{ mb: 2.5 }}>
-                <Typography variant="overline" color="primary.main" sx={{ fontWeight: 800, letterSpacing: 1.25 }}>{program.eyebrow}</Typography>
-                <Typography component="h3" id={`program-${program.id}`} variant="h5" sx={{ fontWeight: 800, letterSpacing: '-.02em' }}>{program.title}</Typography>
-                <Typography color="text.secondary" sx={{ mt: 0.5, maxWidth: 680 }}>{program.description}</Typography>
-              </Box>
-              {items.length ? <Grid container spacing={2} alignItems="stretch">
-                {items.map((listing) => <Grid item xs={12} sm={6} md={4} key={listing.classRecord.id}><ProgramClassCard listing={listing} onEnroll={handleEnroll} /></Grid>)}
-              </Grid> : <Paper variant="outlined" sx={{ p: 3, textAlign: 'center', borderRadius: 3, backgroundColor: 'background.paper' }}>
-                <Typography color="text.secondary">{hasFilters || search ? 'No classes in this program match your filters.' : 'No published classes yet. Check back soon.'}</Typography>
-              </Paper>}
-            </Box>)}
+            {visibleListings.length ? <Grid container spacing={2} alignItems="stretch">
+              {visibleListings.map((listing) => <Grid item xs={12} sm={6} md={4} key={listing.classRecord.id}><ProgramClassCard listing={listing} onEnroll={handleEnroll} /></Grid>)}
+            </Grid> : <Paper variant="outlined" sx={{ p: 3, textAlign: 'center', borderRadius: 3, backgroundColor: 'background.paper' }}>
+              <Typography color="text.secondary">{hasFilters || search ? 'No classes match your filters.' : 'No published classes yet. Check back soon.'}</Typography>
+            </Paper>}
           </Grid>
         </Grid>
       </Container>
