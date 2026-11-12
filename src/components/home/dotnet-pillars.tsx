@@ -54,12 +54,12 @@ const DotPattern: FC<{ color: string; sx: object }> = ({ color, sx }) => (
 
 const DotNetPillars: FC = () => {
   return (
-    <Box component="section" aria-labelledby="dotnet-pillars-title" sx={{ position: 'relative', overflow: 'hidden', py: { xs: 5, md: 6.5 }, backgroundColor: 'background.paper' }}>
-      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
+    <Box component="section" aria-labelledby="dotnet-pillars-title" sx={{ position: 'relative', overflow: 'hidden', py: 10, backgroundColor: 'background.paper' }}>
+      <Container maxWidth={false} sx={{ position: 'relative', zIndex: 1, maxWidth: 1440, px: { xs: 2, sm: 4, md: 6, lg: 8 } }}>
         <Box sx={{ mb: { xs: 3, md: 3.5 } }}>
-          <Typography variant="overline" sx={{ display: 'block', mb: 1, color: '#57b9ad', fontSize: 12, fontWeight: 800, letterSpacing: '0.22em', lineHeight: 1.4 }}>EXPLORE CATEGORIES</Typography>
-          <Typography id="dotnet-pillars-title" component="h2" sx={{ maxWidth: 640, fontSize: { xs: '2.25rem', md: '2.9rem' }, fontWeight: 800, lineHeight: 1.05, letterSpacing: '-0.035em' }}>Explore courses by category</Typography>
-          <Typography color="text.secondary" sx={{ mt: 1.5, maxWidth: 520, fontSize: '1.05rem', lineHeight: 1.6 }}>Discover learning opportunities across different subjects and fields.</Typography>
+          <Typography variant="overline" sx={{ display: 'block', color: '#57b9ad', fontSize: 12, fontWeight: 400, letterSpacing: '3px', lineHeight: 1.4 }}>EXPLORE CATEGORIES</Typography>
+          <Typography id="dotnet-pillars-title" component="h2" sx={{ mt: 1.5, maxWidth: 640, fontSize: { xs: '1.875rem', sm: '2.25rem', md: '2.75rem' }, fontWeight: 700, lineHeight: 1.25, letterSpacing: '-0.025em' }}>Explore courses by category</Typography>
+          <Typography color="text.secondary" sx={{ mt: 1.5, maxWidth: 520, fontSize: '1rem', lineHeight: 1.625 }}>Discover learning opportunities across different subjects and fields.</Typography>
         </Box>
 
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'minmax(0, 5fr) minmax(0, 7fr)' }, gap: { xs: 2.5, md: 2.5 }, alignItems: 'stretch' }}>
