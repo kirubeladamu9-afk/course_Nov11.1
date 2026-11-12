@@ -207,7 +207,6 @@ const HomeHero: FC = () => {
                 position: 'absolute',
                 bottom: 30,
                 left: { xs: 0, md: -150 },
-                boxShadow: 1,
                 borderRadius: 3,
                 px: 2,
                 py: 1.4,
@@ -220,7 +219,6 @@ const HomeHero: FC = () => {
             >
               <Box
                 sx={{
-                  boxShadow: 1,
                   borderRadius: '50%',
                   width: 44,
                   height: 44,
