@@ -138,7 +138,7 @@ const TrainingProgramsPage: FC<TrainingProgramsPageProps> = ({ courses, darkMode
               <Typography sx={{ maxWidth: 590, mb: 3.5, color: 'rgba(255,255,255,.78)', fontSize: { xs: '1rem', md: '1.1rem' }, lineHeight: 1.7 }}>Choose the learning experience that fits your goals, schedule, and stage. Small groups, expert tutors, and real progress.</Typography>
             </Grid>
             <Grid item xs={12} md={5} lg={5} sx={{ display: { xs: 'none', lg: 'block' }, position: 'relative', minHeight: { xs: 220, sm: 280, md: 360 } }}>
-              <Box component="img" src="/images/training-programs/international-online-interactive.webp" alt="" sx={{ position: 'absolute', top: 77, right: 0, height: '100%', width: 'auto', maxWidth: 'none' }} />
+              <Box component="img" src="/images/courses-banner-student.webp" alt="Smiling student holding a notebook with learning illustrations" sx={{ position: 'absolute', top: 77, right: 0, height: '100%', width: 'auto', maxWidth: 'none' }} />
             </Grid>
           </Grid>
         </Container>
