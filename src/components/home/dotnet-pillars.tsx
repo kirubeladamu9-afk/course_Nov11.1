@@ -62,8 +62,8 @@ const DotNetPillars: FC = () => {
           <Typography color="text.secondary" sx={{ mt: 2, maxWidth: 520, fontSize: '1.05rem', lineHeight: 1.7 }}>Discover learning opportunities across different subjects and fields.</Typography>
         </Box>
 
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'minmax(0, 5fr) minmax(0, 7fr)' }, gap: { xs: 2.5, md: 3 }, alignItems: 'start' }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, minWidth: 0 }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'minmax(0, 5fr) minmax(0, 7fr)' }, gap: { xs: 2.5, md: 3 }, alignItems: 'stretch' }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 2.5, md: '30px' }, minWidth: 0 }}>
             <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))' }, gap: 2 }}>
               <Box component="article" sx={{ ...cardSx, '--accent': '#57b9ad', p: 2.5 }}>
                 <Typography sx={{ mb: 1.5, color: '#57b9ad', fontSize: 11, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' }}>Catalog</Typography>
@@ -76,7 +76,7 @@ const DotNetPillars: FC = () => {
                 <Typography color="text.secondary" sx={{ fontSize: '0.9rem', lineHeight: 1.6 }}>Join scheduled sessions or learn on your own schedule.</Typography>
               </Box>
             </Box>
-            <Box component="img" src={introImage} alt="Students collaborating around a table" sx={{ display: 'block', width: '100%', aspectRatio: { xs: '4 / 3', md: '5 / 4' }, objectFit: 'cover', borderRadius: 2 }} />
+            <Box component="img" src={introImage} alt="Students collaborating around a table" sx={{ display: 'block', width: '100%', aspectRatio: { xs: '4 / 3', md: 'auto' }, flex: { md: '1 1 0' }, minHeight: { md: 260 }, height: { md: 0 }, objectFit: 'cover', borderRadius: 2 }} />
           </Box>
 
           <Box sx={{ position: 'relative', minWidth: 0 }}>
