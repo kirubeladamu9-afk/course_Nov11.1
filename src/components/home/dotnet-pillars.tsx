@@ -54,7 +54,7 @@ const DotPattern: FC<{ color: string; sx: object }> = ({ color, sx }) => (
 
 const DotNetPillars: FC = () => {
   return (
-    <Box component="section" aria-labelledby="dotnet-pillars-title" sx={{ position: 'relative', overflow: 'hidden', py: 10, backgroundColor: 'background.paper' }}>
+    <Box component="section" aria-labelledby="dotnet-pillars-title" sx={{ position: 'relative', overflow: 'hidden', py: 10, backgroundColor: '#FAFAFA' }}>
       <Container maxWidth={false} sx={{ position: 'relative', zIndex: 1, maxWidth: 1440, px: { xs: 2, sm: 4, md: 6, lg: 8 } }}>
         <Box sx={{ mb: { xs: 3, md: 3.5 } }}>
           <Typography variant="overline" sx={{ display: 'block', color: '#57b9ad', fontSize: 12, fontWeight: 400, letterSpacing: '3px', lineHeight: 1.4 }}>EXPLORE CATEGORIES</Typography>

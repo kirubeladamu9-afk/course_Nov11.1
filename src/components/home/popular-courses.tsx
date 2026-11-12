@@ -59,7 +59,7 @@ const HomePopularCourse: FC<{ courses: Course[] }> = ({ courses }) => {
           md: 8,
         },
         pb: 14,
-        backgroundColor: 'background.default',
+        backgroundColor: '#FFFFFF',
       }}
     >
       <Container maxWidth="lg">
