@@ -256,6 +256,7 @@ const HomeHero: FC = () => {
           sx={{
             position: 'relative',
             isolation: 'isolate',
+            mt: { xs: 3, md: 4 },
             py: { xs: 3, md: 4 },
             px: { xs: 3, md: 5 },
             borderRadius: 3,
