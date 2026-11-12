@@ -10,7 +10,6 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 interface Exp {
   label: string
   value: number
-  from: number
   suffix: string
 }
 interface ExpItemProps {
@@ -23,27 +22,24 @@ const exps: Array<Exp> = [
   {
     label: 'Students',
     value: 10,
-    from: 15,
     suffix: 'K+',
   },
   {
     label: 'Quality Course',
     value: 20,
-    from: 25,
     suffix: '+',
   },
   {
     label: 'Experience Mentors',
     value: 10,
-    from: 15,
     suffix: '+',
   },
 ]
 
 const ExpItem: FC<ExpItemProps> = ({ item }) => {
-  const { value, from, suffix, label } = item
+  const { value, suffix, label } = item
   const ref = useRef<HTMLDivElement>(null)
-  const [count, setCount] = useState(from)
+  const [count, setCount] = useState(0)
 
   useEffect(() => {
     const node = ref.current
@@ -61,7 +57,7 @@ const ExpItem: FC<ExpItemProps> = ({ item }) => {
         const tick = (now: number) => {
           const progress = Math.min((now - start) / COUNTDOWN_DURATION, 1)
           const eased = 1 - Math.pow(1 - progress, 3)
-          setCount(Math.round(from - (from - value) * eased))
+          setCount(Math.round(value * eased))
           if (progress < 1) frame = requestAnimationFrame(tick)
         }
         frame = requestAnimationFrame(tick)
@@ -73,7 +69,7 @@ const ExpItem: FC<ExpItemProps> = ({ item }) => {
       observer.disconnect()
       cancelAnimationFrame(frame)
     }
-  }, [from, value])
+  }, [value])
 
   return (
     <Box ref={ref} sx={{ textAlign: 'center', mb: { xs: 1, md: 0 } }}>
@@ -256,7 +252,26 @@ const HomeHero: FC = () => {
         </Grid>
 
         {/* Experience */}
-        <Box sx={{ py: { xs: 3, md: 4 }, px: { xs: 3, md: 5 }, borderRadius: 3, backgroundColor: 'background.paper', boxShadow: '0 6px 14px 0 rgba(15, 23, 42, 0.08)' }}>
+        <Box
+          sx={{
+            position: 'relative',
+            isolation: 'isolate',
+            py: { xs: 3, md: 4 },
+            px: { xs: 3, md: 5 },
+            borderRadius: 3,
+            backgroundColor: 'background.paper',
+            '&::after': {
+              content: '""',
+              position: 'absolute',
+              inset: 0,
+              zIndex: -1,
+              borderRadius: 3,
+              pointerEvents: 'none',
+              boxShadow: '0 8px 14px 0 rgba(15, 23, 42, 0.08)',
+              clipPath: 'inset(0 -40px -40px -40px)',
+            },
+          }}
+        >
           <Grid container spacing={2}>
             {exps.map((item) => (
               <Grid key={item.label} item xs={12} md={4}>

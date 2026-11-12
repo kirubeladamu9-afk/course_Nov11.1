@@ -40,22 +40,7 @@ const Header: FC<Props> = ({ darkMode, showSocialLinks = false, onToggleDarkMode
   }
 
   return (
-    <Box
-      sx={{
-        position: 'relative',
-        zIndex: 1,
-        backgroundColor: 'background.paper',
-        '&::after': {
-          content: '""',
-          position: 'absolute',
-          inset: 0,
-          zIndex: -1,
-          pointerEvents: 'none',
-          boxShadow: '0 8px 14px 0 rgba(15, 23, 42, 0.12)',
-          clipPath: 'inset(0 -40px -40px -40px)',
-        },
-      }}
-    >
+    <Box sx={{ position: 'relative', zIndex: 1, backgroundColor: 'background.paper' }}>
       <Container sx={{ py: { xs: 2, md: 3 } }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Logo onClick={() => navigateTo('/')} />
