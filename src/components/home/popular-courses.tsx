@@ -68,7 +68,7 @@ const HomePopularCourse: FC<{ courses: Course[] }> = ({ courses }) => {
             <Typography component="h2" variant="h3" sx={{ maxWidth: 170, fontSize: { xs: '2.25rem', md: '2.5rem' }, lineHeight: 1.2 }}>Most Popular Courses</Typography>
           </Grid>
           <Grid item xs={12} md={9} sx={{ minWidth: 0 }}>
-            {courses.length > 0 && <Box sx={{ width: '100%', minWidth: 0 }}>
+            {courses.length > 0 && <Box sx={{ width: '100%', minWidth: 0, maxWidth: { md: courses.length === 1 ? '33.333%' : '100%' } }}>
               <Slider ref={sliderRef} {...sliderConfig}>
                 {courses.map((item) => (
                   <CourseCardItem key={String(item.id)} item={item} />
